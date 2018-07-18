@@ -1,175 +1,117 @@
-var transControls;
-var renderer;
-var scene;
-var camera;
-var controls;
+/**
+ * @author Abraham Cardenas / https://github.com/Abe-Crdns (acarde12@ucsc.edu)
+ * @version 1.0
+ */
 
-function init() {
-  var obj1;
-  var canvas = document.getElementById('canvas');
+// global program variables
+var renderer, scene, camera, controls, objMesh, object;
+var ambientLight, ptLightArr = [];
+var xLight1, yLight1, zLight1;
+var xLight2, yLight2, zLight2;
+var xLight3, yLight3, zLight3;
+var GridXY1, GridXY2;
+var GridXZ1, GridXZ2;
+var GridYZ1, GridYZ2;
+var GridSizes, GridXYCol, GridXZCol, GridYZCol;
+var transformArr = [];
+var xTransVal = 0, yTransVal = 0, zTransVal = 0;
+var xScaleVal = 0, yScaleVal = 0, zScaleVal = 0;
+var xShearVal = 0, yShearVal = 0, zShearVal = 0;
+var xRotVal = 0, yRotVal = 0, zRotVal = 0;
 
-  renderer = new THREE.WebGLRenderer({canvas: canvas});
-  canvas.width  = canvas.clientWidth;
-  canvas.height = canvas.clientHeight;
-  //renderer.setViewport(0, 0, canvas.clientWidth, canvas.clientHeight);
-  renderer.setSize( 500, 500 );
+function init(){
+  // RENDERER
+  var canvas = document.getElementById('canvas1');
+  renderer = new THREE.WebGLRenderer({canvas: canvas}, {antialias: true});
+  renderer.setClearColor(0xA0A0A0);
+  renderer.setSize(window.innerHeight-10, window.innerHeight-10);
+  //document.body.appendChild(renderer.domElement);
+  //document.body.appendChild(document.getElementById('content'));
+
+  // CAMERA & SCENE
+  camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
   scene = new THREE.Scene();
-  scene.background = new THREE.Color( 0xffffff );
 
-  camera = new THREE.PerspectiveCamera( 75, canvas.clientWidth/canvas.clientHeight, 0.1, 10000 );
-  camera.position.z = 5;
-
-  //renderer = new THREE.WebGLRenderer();
-  //renderer.setSize( window.innerWidth, window.innerHeight );
-  document.body.appendChild( renderer.domElement );
-
+  // CAMERA CONTROLS
   controls = new THREE.OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
   controls.dampingFactor = 0.25;
   controls.enableZoom = true;
 
-  var keyLight = new THREE.DirectionalLight(new THREE.Color('hsl(30, 100%, 75%)'), 1.0);
-  keyLight.position.set(-100, 0, 100);
+  // LIGHTING
+  ptLightArr.push(new THREE.PointLight(0xffffff, 1, 0));
+  ptLightArr.push(new THREE.PointLight(0xffffff, 1, 0));
+  ptLightArr.push(new THREE.PointLight(0xffffff, 1, 0));
 
-  var fillLight = new THREE.DirectionalLight(new THREE.Color('hsl(240, 100%, 75%)'), 0.75);
-  fillLight.position.set(100, 0, 100);
+  xLight1 = 0; yLight1 = 200; zLight1 = 0;
+  ptLightArr[0].position.set(xLight1, yLight1, zLight1);
+  xLight2 = 100; yLight2 = 200; zLight2 = 100;
+  ptLightArr[1].position.set(xLight2, yLight2, zLight2);
+  xLight3 = -100; yLight3 = -200; zLight3 = -100;
+  ptLightArr[2].position.set(xLight3, yLight3, zLight3);
 
-  var backLight = new THREE.DirectionalLight(0xffffff, 1.0);
-  backLight.position.set(100, 0, -100).normalize();
+  scene.add(ptLightArr[0]);
+  scene.add(ptLightArr[1]);
+  scene.add(ptLightArr[2]);
 
-  var ambient = new THREE.AmbientLight( 0x808080 ); // soft white light
+  ambientLight = new THREE.AmbientLight(0xffffff);
+  scene.add(ambientLight);
 
-  scene.add(ambient);
-  scene.add(keyLight);
-  scene.add(fillLight);
-  scene.add(backLight);
+  // INITIAL CUBE OBJECT
+  object = new THREE.BoxGeometry(2, 2, 2);
+  object.name = 'cube1';
+  var material = new THREE.MeshStandardMaterial();
+  objMesh = new THREE.Mesh(object, material);
+  objMesh.material.color.setHex(0x2194ce);
+  objMesh.name = 'cube1';
+  scene.add(objMesh);
 
-  var mtlLoader = new THREE.MTLLoader();
-  mtlLoader.setTexturePath('objects/Aventador/');
-  mtlLoader.setPath('objects/Aventador/');
-  mtlLoader.load('Avent.mtl', function(materials){
+  // ADJUST THE SCENE
+  controls.reset();
+  objMesh.position.x = 1;
+  objMesh.position.y = 1;
+  objMesh.position.z = 1;
+  camera.position.x = 25;
+  camera.position.y = 25;
+  camera.position.z = 25;
 
-    materials.preload();
+  // INITIAL COORDINATE SYSTEM
+  GridSizes = 40;
+  GridXYCol = new THREE.Color(0x008800);
+  GridXZCol = new THREE.Color(0x000088);
+  GridYZCol = new THREE.Color(0x880000);
 
-    var objLoader = new THREE.OBJLoader();
-    objLoader.setMaterials(materials);
-    objLoader.setPath('objects/Aventador/');
-    objLoader.load('Avent.obj', function(object){
-      obj1 = new THREE.Mesh(object, materials);
-      scene.add(object);
-      //object.position.y -= 60;
-    });
+  GridXZ1 = new LabeledGrid(GridSizes, GridSizes, 10, [0, 1, 0], 0x000088, 0.4, true, "#000000", "left");
+  GridXZ1.name = "GridXZ1";
+  scene.add(GridXZ1);
+  GridXZ2 = new LabeledGrid(GridSizes, GridSizes, 10, [0, -1, 0], 0x000088, 0.4, true, "#000000", "left");
+  GridXZ2.name = "GridXZ2";
+  scene.add(GridXZ2);
 
-  });
+  GridXY1 = new LabeledGrid(GridSizes, GridSizes, 10, [0, 0, 1], 0x008800, 0.4, true, "#000000", "left");
+  GridXY1.name = "GridXY1";
+  scene.add(GridXY1);
+  GridXY2 = new LabeledGrid(GridSizes, GridSizes, 10, [0, 0, -1], 0x008800, 0.4, true, "#000000", "left");
+  GridXY2.name = "GridXY2";
+  scene.add(GridXY2);
 
-  var gridHelper = new THREE.GridHelper( 20, 20 );
-  scene.add( gridHelper );
+  GridYZ1 = new LabeledGrid(GridSizes, GridSizes, 10, [1, 0, 0], 0x880000, 0.4, true, "#000000", "left");
+  GridYZ1.name = "GridYZ1";
+  scene.add(GridYZ1);
+  GridYZ2 = new LabeledGrid(GridSizes, GridSizes, 10, [-1, 0, 0], 0x880000, 0.4, true, "#000000", "left");
+  GridYZ2.name = "GridYZ2";
+  scene.add(GridYZ2);
 
-  transControls = new function () {
-      this.rotationSpeed = 0.01;
-      this.scale = 1;
-      this.x = 0.8;
-      this.y = 0.8;
-      this.z = 0.8;
+  // GUI
+  setupGui();
 
-      this.a = 0.1;
-      this.b = 0.1;
-      this.c = 0.1;
-      this.d = 0.1;
-      this.e = 0.1;
-      this.f = 0.1;
+  // EVENTS
+  window.addEventListener('resize', function(){
+    renderer.setSize(window.innerHeight-10, window.innerHeight-10);
+  }, false);
 
-      this.theta = 0.1;
-
-
-      this.doTranslation = function () {
-          // you have two options, either use the
-          // helper function provided by three.js
-          // new THREE.Matrix4().makeTranslation(3,3,3);
-          // or do it yourself
-          var translationMatrix = new THREE.Matrix4();
-          translationMatrix.set(
-                  1, 0, 0, transControls.x,
-                  0, 1, 0, transControls.y,
-                  0, 0, 1, transControls.z,
-                  0, 0, 0, 1
-          );
-          obj1.geometry.applyMatrix(translationMatrix);
-          obj1.geometry.verticesNeedUpdate = true;
-
-          // or do it on the geometry
-          // cube.geometry applyMatrix(translationMatrix);
-          // cube.geometry.verticesNeedUpdate = true;
-      }
-
-      this.doScale = function () {
-          var scaleMatrix = new THREE.Matrix4();
-          scaleMatrix.set(
-                  transControls.x, 0, 0, 0,
-                  0, transControls.y, 0, 0,
-                  0, 0, transControls.z, 0,
-                  0, 0, 0, 1
-          );
-
-          obj1.geometry.applyMatrix(scaleMatrix);
-          obj1.geometry.verticesNeedUpdate = true;
-      }
-
-      this.doShearing = function () {
-
-          var scaleMatrix = new THREE.Matrix4();
-          scaleMatrix.set(
-                  1, this.a, this.b, 0,
-                  this.c, 1, this.d, 0,
-                  this.e, this.f, 1, 0,
-                  0, 0, 0, 1
-          );
-
-
-          obj1.geometry.applyMatrix(scaleMatrix);
-          obj1.geometry.verticesNeedUpdate = true;
-      }
-
-      this.doRotationY = function () {
-          var c = Math.cos(this.theta), s = Math.sin(this.theta);
-
-          var rotationMatrix = new THREE.Matrix4();
-          rotationMatrix.set(
-                  c, 0, s, 0,
-                  0, 1, 0, 0,
-                  -s, 0, c, 0,
-                  0, 0, 0, 1
-          );
-
-          obj1.geometry.applyMatrix(rotationMatrix);
-          obj1.geometry.verticesNeedUpdate = true;
-      }
-
-
-  };
-  addControls(transControls);
-
-  // call the render function
   animate();
 }
-
-function addControls(controlObject) {
-  var gui = new dat.GUI();
-  gui.add(controlObject, 'doTranslation');
-  gui.add(controlObject, 'doScale');
-  gui.add(controlObject, 'doShearing');
-  gui.add(controlObject, 'doRotationY');
-}
-
-/*
-onResize(canvas, function () {
-     canvas.width  = canvas.clientWidth;
-     canvas.height = canvas.clientHeight;
-     renderer.setViewport(0, 0, canvas.clientWidth, canvas.clientHeight);
-     camera.aspect = canvas.clientWidth / canvas.clientHeight;
-     camera.updateProjectionMatrix();
- });
-*/
 
 var animate = function(){
   requestAnimationFrame(animate);
