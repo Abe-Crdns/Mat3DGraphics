@@ -5,7 +5,10 @@
 		<title>Mat3D</title>
 
 		<style>
-			body{ margin: 0; }
+			body{
+				margin: 0;
+				background-image: url("MatrixBackground.jpg");
+			}
 			#container{
 				position: relative;
 			}
@@ -47,8 +50,8 @@
 		<script src="loaders/STLLoader.js"></script>
 		<script src="grids/LabeledGrid.js"></script>
 		<script src="geometries/TeapotBufferGeometry.js"></script>
-		<script src="driver.js"></script>
-		<script src="driverHelperFuncs.js"></script>
+		<script src="Graphics.js"></script>
+		<script src="GraphicsFuncs.js"></script>
 
 		<div class="container">
 			<div id="content"></div>
@@ -59,10 +62,10 @@
 		<div id="log"></div>
 
 		<script>
-			(function (){
+			(function(){
 				var old = console.log;
 				var logger = document.getElementById('log');
-				console.log = function (message){
+				console.log = function(message){
 					if(typeof message == 'object'){
 						logger.innerHTML += (JSON && JSON.stringify ? JSON.stringify(message) : message) + '<br />';
 					}
