@@ -2,27 +2,32 @@
  * @author Abraham Cardenas / https://github.com/Abe-Crdns (acarde12@ucsc.edu)
  */
 
-function readFileByType(ev){
+function readFileByType(){
   var filename = (fileInput.files[0]).name;
   var reader = new FileReader();
 
   reader.addEventListener('progress', function(event){
     var size = '(' + Math.floor(event.total / 1000) + ' KB)';
-    //var progress = Math.floor( ( event.loaded / event.total ) * 100 ) + '%';
-    console.log('Loading', filename, size);
+    var progress = Math.floor( ( event.loaded / event.total ) * 100 );
+    console.log("Loading " + filename + "..." + progress.toString() + "%", size);
   });
 
+  // previous values in case invalid file
   var prevObj = object;
   var prevObjMesh = objMesh;
+  var prevTransfArr = transformArr;
 
-  displayLoadScreen();
   removeObjByType();
 
   var fileExt = filename.split('.').pop().toLowerCase();
 
   switch(fileExt){
     case 'obj':
+      var dateBefore = new Date();
       reader.addEventListener('load', function(event){
+        var dateAfter = new Date();
+        console.log(filename, "loaded in", (dateAfter - dateBefore), "ms");
+
         var contents = event.target.result;
         object = new THREE.OBJLoader().parse(contents);
         object.name = filename;
@@ -37,7 +42,11 @@ function readFileByType(ev){
       break;
 
     case 'stl':
+      var dateBefore = new Date();
       reader.addEventListener('load', function(event){
+        var dateAfter = new Date();
+        console.log(filename, "loaded in", (dateAfter - dateBefore), "ms");
+
         var contents = event.target.result;
 
         var geometry = new THREE.STLLoader().parse(contents);
@@ -53,6 +62,7 @@ function readFileByType(ev){
         scene.add(objMesh);
         adjustObjAndCam(objMesh, objMesh);
         removeLoadScreen();
+        console.log();
       }, false);
 
       if(reader.readAsBinaryString !== undefined){
@@ -62,59 +72,17 @@ function readFileByType(ev){
         reader.readAsArrayBuffer(fileInput.files[0]);
       }
       break;
-      /*
-    case 'glb':
-    case 'gltf':
-      reader.addEventListener('load', function(event){
-        var contents = event.target.result;
-        var loader;
 
-        if(isGltf1(contents)){
-          loader = new THREE.LegacyGLTFLoader();
-        }
-        else{
-          loader = new THREE.GLTFLoader();
-        }
-
-        loader.parse(contents, '', function(result){
-          result.scene.name = filename;
-          scene.add(result.scene);
-          //editor.execute(new AddObjectCommand(result.scene));
-        });
-
-      }, false);
-
-      reader.readAsArrayBuffer(fileInput.files[0]);
-      break;
-
-    case 'fbx':
-      reader.addEventListener('load', function(event){
-        var contents = event.target.result;
-
-        var loader = new THREE.FBXLoader();
-        //console.log(event.target);
-        //console.log(contents);
-        object = loader.parse(contents);
-        //object.name = filename;
-      //  scene.add(object);
-
-        //editor.execute( new AddObjectCommand(object));
-
-      }, false);
-
-      reader.readAsArrayBuffer(fileInput.files[0]);
-      break;
-      */
     case 'zip':
       reader.addEventListener('load', function(event){
         var dateBefore = new Date();
 
-        JSZip.loadAsync(ev.target.files[0])
+        JSZip.loadAsync(fileInput.files[0])
         .then(function(zip){
           var dateAfter = new Date();
           var objFile = '', mtlFile = '';
 
-          console.log("Loaded in " + (dateAfter - dateBefore) + "ms");
+          console.log("Loaded " + filename + " in " + (dateAfter - dateBefore) + "ms");
           zip.forEach(function(relativePath, zipEntry){
             var currExt = zipEntry.name.split('.').pop().toLowerCase();
             if(zipEntry.name.indexOf("__MACOSX") == -1){
@@ -136,7 +104,9 @@ function readFileByType(ev){
             console.log("Error, did not find obj and mtl file within the zip file.");
             object = prevObj;
             objMesh = prevObjMesh;
-            if(object.name != 'cube1' && fileExt != 'stl'){
+
+            var objName = object.name;
+            if(objName != 'cube1' && objName != 'teapot1' && objName != 'sphere1' && objName != 'cylinder1' && fileExt != 'stl'){
               scene.add(object);
             }
             else{
@@ -169,7 +139,10 @@ function readFileByType(ev){
       console.log('Error, select an obj, stl, or zip file.');
       object = prevObj;
       objMesh = prevObjMesh;
-      if(object.name != 'cube1'){
+      transformArr = prevTransfArr;
+
+      var objName = object.name;
+      if(objName != 'cube1' && objName != 'teapot1' && objName != 'sphere1' && objName != 'cylinder1' && fileExt != 'stl'){
         scene.add(object);
       }
       else{
@@ -202,18 +175,14 @@ function adjustObjAndCam(object, objMesh){
 
     objBox = new THREE.Box3();
     objBox.setFromObject(object);
-
-    objHeight = objBox.max.y - objBox.min.y;
-    objWidth = objBox.max.x - objBox.min.x;
-    objDepth = objBox.max.z - objBox.min.z;
   }
   controls.reset();
   object.position.x = 0;
   object.position.y = 0;
   object.position.z = 0;
-  camera.position.x = (objHeight + objWidth + objDepth)*2;
-  camera.position.y = (objHeight + objWidth + objDepth)*2;
-  camera.position.z = (objHeight + objWidth + objDepth)*2;
+  camera.position.x = 15;
+  camera.position.y = 15;
+  camera.position.z = 15;
 }
 
 function removeEntity(object, scene){
@@ -232,14 +201,17 @@ function removeObjByType(){
   else{
     removeEntity(objMesh, scene);
   }
+  transformArr = [];
+  //console.clear();
+  document.getElementById("log").innerHTML = "";
   object = null; objMesh = null;
 }
 
 function displayLoadScreen(){
   document.getElementById("content").innerHTML =
   '<object id="loadScreen" type="text/html" data="loadingScreen/index.html"></object>';
-  document.getElementById('loadScreen').setAttribute("height", window.innerHeight-10);
-  document.getElementById('loadScreen').setAttribute("width", window.innerHeight-10);
+  document.getElementById('loadScreen').setAttribute("height", 500);
+  document.getElementById('loadScreen').setAttribute("width", 500);
 }
 
 function removeLoadScreen(){
@@ -247,46 +219,9 @@ function removeLoadScreen(){
   loadScreen.parentNode.removeChild(loadScreen);
 }
 
-function setupGui(){
-  var gui = new dat.GUI();
-  var isAmbient = true, isLight1 = true, isLight2 = true, isLight3 = true;
-
-  // PREDEFINED OBJECTS
-  var objData = {
-    objects: "Cube"
-  };
-  var objectTypes = gui.add(objData, 'objects', [ "Cube", "Teapot", "Sphere", "Cylinder", "File" ] ).name('Object').listen();
-	objectTypes.onChange(function(value){ handleObjectType(value) });
-
-  var backgroundData = {
-    Background: '#A0A0A0',
-  };
-  var color = new THREE.Color();
-  var colorConvert = handleColorChange(color);
-  gui.addColor(backgroundData, 'Background').onChange(function(value){
-    colorConvert(value);
-    renderer.setClearColor(color.getHex());
-  });
-
-  // LIGHTS FOLDER
-  loadGuiLights(gui, isAmbient, isLight1, isLight2, isLight3);
-
-  // TRANSFORMATIONS FOLDER
-  loadGuiTransfms(gui);
-
-  // COORDINATE SYSTEM COLORS, OPACITY & SIZE
-  loadGuiCoordSys(gui);
-
-  var resetData = {
-    reset: function(){ resetObj() }
-  };
-  gui.add(resetData, 'reset').name("Reset Object");
-
-}
-
 function loadGuiLights(gui, isAmbient, isLight1, isLight2, isLight3){
   // LIGHTS
-  var lightsFldr = gui.addFolder('Lights');
+  var lightsFldr = gui.addFolder('Lighting');
 
   // AMBIENT
   var ambientLightFldr = lightsFldr.addFolder('Ambient Light');
@@ -379,104 +314,114 @@ function loadGuiTransfms(gui){
   // TRANSLATE
   var translateFldr = transformFldr.addFolder('Translate');
   var translateData = function(){
-    this.x = xTransVal.toString();
-    this.y = yTransVal.toString();
-    this.z = zTransVal.toString();
+    this.x = '0';
+    this.y = '0';
+    this.z = '0';
   };
   var transData = new translateData();
   var xTrans = translateFldr.add(transData, 'x');
-  xTrans.onChange(function(value){ handleTransfmChange(value, 'translate', 'x'); transData.x = 0; });
+  xTrans.onFinishChange(function(value){ handleTransfmChange(value, 'translate', 'x'); });
   var yTrans = translateFldr.add(transData, 'y');
-  yTrans.onChange(function(value){ handleTransfmChange(value, 'translate', 'y'); transData.y = 0; });
+  yTrans.onFinishChange(function(value){ handleTransfmChange(value, 'translate', 'y'); });
   var zTrans = translateFldr.add(transData, 'z');
-  zTrans.onChange(function(value){ handleTransfmChange(value, 'translate', 'z'); transData.z = 0; });
+  zTrans.onFinishChange(function(value){ handleTransfmChange(value, 'translate', 'z'); });
 
   // SCALE
   var scaleFldr = transformFldr.addFolder('Scale');
   var scaleData = function(){
-    this.x = xScaleVal.toString();
-    this.y = yScaleVal.toString();
-    this.z = zScaleVal.toString();
+    this.x = '0';
+    this.y = '0';
+    this.z = '0';
   };
-  var scleData = new translateData();
+  var scleData = new scaleData();
   var xScale = scaleFldr.add(scleData, 'x');
-  xScale.onChange(function(value){ handleTransfmChange(value, 'scale', 'x'); scleData.x = 0; });
+  xScale.onFinishChange(function(value){ handleTransfmChange(value, 'scale', 'x'); });
   var yScale = scaleFldr.add(scleData, 'y');
-  yScale.onChange(function(value){ handleTransfmChange(value, 'scale', 'y'); scleData.y = 0; });
+  yScale.onFinishChange(function(value){ handleTransfmChange(value, 'scale', 'y'); });
   var zScale = scaleFldr.add(scleData, 'z');
-  zScale.onChange(function(value){ handleTransfmChange(value, 'scale', 'z'); scleData.z = 0; });
+  zScale.onFinishChange(function(value){ handleTransfmChange(value, 'scale', 'z'); });
 
   // SHEAR
   var shearFldr = transformFldr.addFolder('Shear');
   var shearData = function(){
-    this.x = xShearVal.toString();
-    this.y = yShearVal.toString();
-    this.z = zShearVal.toString();
+    this.x = '0';
+    this.y = '0';
+    this.z = '0';
   };
   var shrData = new shearData();
   var xShear = shearFldr.add(shrData, 'x');
-  xShear.onChange(function(value){ handleTransfmChange(value, 'shear', 'x'); shrData.x = 0; });
+  xShear.onFinishChange(function(value){ handleTransfmChange(value, 'shear', 'x'); });
   var yShear = shearFldr.add(shrData, 'y');
-  yShear.onChange(function(value){ handleTransfmChange(value, 'shear', 'y'); shrData.y = 0; });
+  yShear.onFinishChange(function(value){ handleTransfmChange(value, 'shear', 'y'); });
   var zShear = shearFldr.add(shrData, 'z');
-  zShear.onChange(function(value){ handleTransfmChange(value, 'shear', 'z'); shrData.z = 0; });
+  zShear.onFinishChange(function(value){ handleTransfmChange(value, 'shear', 'z'); });
 
   // ROTATION
   var rotatFldr = transformFldr.addFolder('Rotation');
   var rotatData = function(){
-    this.x = xRotVal.toString();
-    this.y = yRotVal.toString();
-    this.z = zRotVal.toString();
+    this.x = '0';
+    this.y = '0';
+    this.z = '0';
   };
   var rotData = new rotatData();
   var xRot = rotatFldr.add(rotData, 'x');
-  xRot.onChange(function(value){ handleTransfmChange(value, 'rotation', 'x'); rotData.x = 0; });
+  xRot.onFinishChange(function(value){ handleTransfmChange(value, 'rotation', 'x'); });
   var yRot = rotatFldr.add(rotData, 'y');
-  yRot.onChange(function(value){ handleTransfmChange(value, 'rotation', 'y'); rotData.y = 0; });
+  yRot.onFinishChange(function(value){ handleTransfmChange(value, 'rotation', 'y'); });
   var zRot = rotatFldr.add(rotData, 'z');
-  zRot.onChange(function(value){ handleTransfmChange(value, 'rotation', 'z'); rotData.z = 0; });
+  zRot.onFinishChange(function(value){ handleTransfmChange(value, 'rotation', 'z'); });
 }
 
 function loadGuiCoordSys(gui){
   var coordFldr = gui.addFolder('Coordinate Planes');
+
+  // XY PLANE
   var xyFldr = coordFldr.addFolder('XY Plane');
   var opacityXYVal = 0.4;
   var xyData = {
-    'Color': GridXYCol.getHex(),
+    'Grid color': GridXYCol.getHex(),
+    'Text color': textColXY.getHex(),
     'opacity': opacityXYVal,
-    'size': GridSizes
+    'size': GridSizes,
   };
-  var xyCol = xyFldr.addColor(xyData, 'Color').onChange(function(value){ handleGridColor(value, GridXYCol, GridXY1, GridXY2) });
+  xyFldr.addColor(xyData, 'Grid color').onChange(function(value){ handleGridColor(value, GridXYCol, GridXY1, GridXY2) });
+  xyFldr.addColor(xyData, 'Text color').onChange(function(value){ handleTextColor(value, textColXY, GridXY1, GridXY2) });
   var xyOpacity = xyFldr.add(xyData, 'opacity' ).min(0).max(1).step(0.01).name('Opacity').listen();
   xyOpacity.onChange(function(value){ handleGridOpacity(value, GridXY1, GridXY2) });
-  var xySize = xyFldr.add(xyData, 'size' ).min(20).max(500).step(5).name('Size').listen();
-  xySize.onChange(function(value){ GridXY1.resize(value, value); GridXY2.resize(value, value); });
+  var xySize = xyFldr.add(xyData, 'size' ).min(10).max(500).step(5).name('Size').listen();
+  xySize.onChange(function(value){ handleGridSize(value, GridXY1, GridXY2) });
 
+  // XZ PLANE
   var xzFldr = coordFldr.addFolder('XZ Plane');
   var opacityXZVal = 0.4;
   var xzData = {
-    'Color': GridXZCol.getHex(),
+    'Grid color': GridXZCol.getHex(),
+    'Text color': textColXZ.getHex(),
     'Opacity': opacityXZVal,
     'Size': GridSizes
   };
-  var xzCol = xzFldr.addColor(xzData, 'Color').onChange(function(value){ handleGridColor(value, GridXZCol, GridXZ1, GridXZ2) });
+  xzFldr.addColor(xzData, 'Grid color').onChange(function(value){ handleGridColor(value, GridXZCol, GridXZ1, GridXZ2) });
+  xzFldr.addColor(xzData, 'Text color').onChange(function(value){ handleTextColor(value, textColXZ, GridXZ1, GridXZ2) });
   var xzOpacity = xzFldr.add(xzData, 'Opacity' ).min(0).max(1).step(0.01).name('Opacity').listen();
   xzOpacity.onChange(function(value){ handleGridOpacity(value, GridXZ1, GridXZ2) });
-  var xzSize = xzFldr.add(xzData, 'Size' ).min(20).max(500).step(5).name('Size').listen();
-  xzSize.onChange(function(value){ GridXZ1.resize(value, value); GridXZ2.resize(value, value); });
+  var xzSize = xzFldr.add(xzData, 'Size' ).min(10).max(500).step(5).name('Size').listen();
+  xzSize.onChange(function(value){ handleGridSize(value, GridXZ1, GridXZ2) });
 
+  // YZ PLANE
   var yzFldr = coordFldr.addFolder('YZ Plane');
   var opacityYZVal = 0.4;
   var yzData = {
-    'Color': GridYZCol.getHex(),
+    'Grid color': GridYZCol.getHex(),
+    'Text color': textColYZ.getHex(),
     'Opacity': opacityYZVal,
     'Size': GridSizes
   };
-  var yzCol = yzFldr.addColor(yzData, 'Color').onChange(function(value){ handleGridColor(value, GridYZCol, GridYZ1, GridYZ2) });
+  yzFldr.addColor(yzData, 'Grid color').onChange(function(value){ handleGridColor(value, GridYZCol, GridYZ1, GridYZ2) });
+  yzFldr.addColor(yzData, 'Text color').onChange(function(value){ handleTextColor(value, textColYZ, GridYZ1, GridYZ2) });
   var yzOpacity = yzFldr.add(yzData, 'Opacity' ).min(0).max(1).step(0.01).name('Opacity').listen();
   yzOpacity.onChange(function(value){ handleGridOpacity(value, GridYZ1, GridYZ2) });
-  var yzSize = yzFldr.add(yzData, 'Size' ).min(20).max(500).step(5).name('Size').listen();
-  yzSize.onChange(function(value){ GridYZ1.resize(value, value); GridYZ2.resize(value, value); });
+  var yzSize = yzFldr.add(yzData, 'Size' ).min(10).max(500).step(5).name('Size').listen();
+  yzSize.onChange(function(value){ handleGridSize(value, GridYZ1, GridYZ2) });
 }
 
 function resetObj(){
@@ -484,16 +429,18 @@ function resetObj(){
   for(var i = 0; i < transformArr.length; i++){
     var temp = new THREE.Matrix4();
     var invMat = temp.getInverse(transformArr[i]);
-    resMat.multiply(invMat);//objMesh.geometry.applyMatrix(invMat);
-    //objMesh.geometry.verticesNeedUpdate = true;
+    resMat.multiply(invMat);
   }
   objMesh.geometry.applyMatrix(resMat);
   objMesh.geometry.verticesNeedUpdate = true;
+  controls.reset();
+  camera.position.x = 15;
+  camera.position.y = 15;
+  camera.position.z = 15;
+
   transformArr = [];
-  console.clear();
-  xTransVal = 0; yTransVal = 0; zTransVal = 0;
-  xScaleVal = 0; yScaleVal = 0; zScaleVal = 0;
-  xShearVal = 0; yShearVal = 0; zShearVal = 0;
+  //console.clear();
+  document.getElementById("log").innerHTML = "";
 }
 
 function handleLightPosChange(value, lightType, dir){
@@ -570,121 +517,98 @@ function handleLightPosChange(value, lightType, dir){
 }
 
 function handleTransfmChange(value, transformType, dir){
-  var num = stringToNum(value);
+  var num = exprToNum(value);
   if(num != null){
     if(num == 0){
       return;
     }
+    else if((transformType == 'translate' || transformType == 'scale' || transformType == 'shear') && num > 250){
+      console.log("Error, can not apply a " + transformType + " transformation larger than 250 units.");
+      return;
+    }
     else{
+      var strNum = num.toString();
       switch(transformType){
         case 'translate':
           var transMat;
           switch(dir){
             case 'x':
-              if(xTransVal != num){
-                xTransVal = num;
-                transMat = new THREE.Matrix4().makeTranslation(xTransVal, 0, 0);
-                console.log("Translated in the x direction by", xTransVal, "units.");
-              }
+              transMat = new THREE.Matrix4().makeTranslation(num, 0, 0);
+              console.log("Translated in the x direction by " + strNum + " units.");
               break;
 
             case 'y':
-              if(yTransVal != num){
-                yTransVal = num;
-                transMat = new THREE.Matrix4().makeTranslation(0, yTransVal, 0);
-                console.log("Translated in the y direction by", yTransVal, "units.");
-              }
+              transMat = new THREE.Matrix4().makeTranslation(0, num, 0);
+              console.log("Translated in the y direction by " + strNum + " units.");
               break;
 
             case 'z':
-              if(zTransVal != num){
-                zTransVal = num;
-                transMat = new THREE.Matrix4().makeTranslation(0, 0, zTransVal);
-                console.log("Translated in the z direction by", zTransVal, "units.");
-              }
+              transMat = new THREE.Matrix4().makeTranslation(0, 0, num);
+              console.log("Translated in the z direction by " + strNum + " units.");
               break;
 
             default:
               console.log("?_? ._.");
               break;
           }
-          if(transMat != null){
-            transformArr.push(transMat);
-            objMesh.geometry.applyMatrix(transMat);
-            objMesh.geometry.verticesNeedUpdate = true;
-          }
+          transformArr.push(transMat);
+          objMesh.geometry.applyMatrix(transMat);
+          objMesh.geometry.verticesNeedUpdate = true;
           break;
 
         case 'scale':
           var scaleMat;
           switch(dir){
             case 'x':
-              if(xScaleVal != num){
-                xScaleVal = num;
-                scaleMat = new THREE.Matrix4().makeScale(xScaleVal, 1, 1);
-                console.log("Scaled in the x direction by", xScaleVal, "units.");
-              }
+              scaleMat = new THREE.Matrix4().makeScale(num, 1, 1);
+              console.log("Scaled in the x direction by " + strNum + " units.");
               break;
 
             case 'y':
-              if(yScaleVal != num){
-                yScaleVal = num;
-                scaleMat = new THREE.Matrix4().makeScale(1, yScaleVal, 1);
-                console.log("Scaled in the y direction by", yScaleVal, "units.");
-              }
+              scaleMat = new THREE.Matrix4().makeScale(1, num, 1);
+              console.log("Scaled in the y direction by " + strNum + " units.");
               break;
 
             case 'z':
-              if(zScaleVal != num){
-                zScaleVal = num;
-                scaleMat = new THREE.Matrix4().makeScale(1, 1, zScaleVal);
-                console.log("Scaled in the z direction by", zScaleVal, "units.");
-              }
+              scaleMat = new THREE.Matrix4().makeScale(1, 1, num);
+              console.log("Scaled in the z direction by " + strNum + " units.");
               break;
 
             default:
               console.log("?_? ._.");
               break;
           }
-          if(scaleMat != null){
-            transformArr.push(scaleMat);
-            objMesh.geometry.applyMatrix(scaleMat);
-            objMesh.geometry.verticesNeedUpdate = true;
-          }
+          transformArr.push(scaleMat);
+          objMesh.geometry.applyMatrix(scaleMat);
+          objMesh.geometry.verticesNeedUpdate = true;
           break;
 
         case 'shear':
           var shearMat;
-          switch(dir){
-            case 'x':
-              if(xShearVal != num){
-                xShearVal = num;
-                shearMat = new THREE.Matrix4().makeShear(xShearVal, 0, 0);
-                console.log("Sheared in the x direction by", xShearVal, "units.");
-              }
-              break;
-
-            case 'y':
-              if(yShearVal != num){
-                yShearVal = num;
-                shearMat = new THREE.Matrix4().makeShear(0, yShearVal, 0);
-                console.log("Sheared in the y direction by", yShearVal, "units.");
-              }
-              break;
-
-            case 'z':
-              if(zShearVal != num){
-                zShearVal = num;
-                shearMat = new THREE.Matrix4().makeShear(0, 0, zShearVal);
-                console.log("Sheared in the z direction by", zShearVal, "units.");
-              }
-              break;
-
-            default:
-              console.log("?_? ._.");
-              break;
+          if(fileInput.files[0] != null){
+            console.log("Due to a bug, shear is disabled in file mode, sorry!");
           }
-          if(shearMat != null){
+          else{
+            switch(dir){
+              case 'x':
+                shearMat = new THREE.Matrix4().makeShear(num, 0, 0);
+                console.log("Sheared in the x direction by " + strNum + " units.");
+                break;
+
+              case 'y':
+                shearMat = new THREE.Matrix4().makeShear(0, num, 0);
+                console.log("Sheared in the y direction by " + strNum + " units.");
+                break;
+
+              case 'z':
+                shearMat = new THREE.Matrix4().makeShear(0, 0, num);
+                console.log("Sheared in the z direction by " + strNum + " units.");
+                break;
+
+              default:
+                console.log("?_? ._.");
+                break;
+            }
             transformArr.push(shearMat);
             objMesh.geometry.applyMatrix(shearMat);
             objMesh.geometry.verticesNeedUpdate = true;
@@ -696,38 +620,27 @@ function handleTransfmChange(value, transformType, dir){
           var rad = num * (Math.PI/180);
           switch(dir){
             case 'x':
-              if(xRotVal != num){
-                xRotVal = num;
-                rotMat = new THREE.Matrix4().makeRotationX(rad);
-                console.log("Rotated in the x direction by", xRotVal, "degrees.");
-              }
+              rotMat = new THREE.Matrix4().makeRotationX(rad);
+              console.log("Rotated in the x direction by " + strNum + " degrees.");
               break;
 
             case 'y':
-              if(yRotVal != num){
-                yRotVal = num;
-                rotMat = new THREE.Matrix4().makeRotationY(rad);
-                console.log("Rotated in the y direction by", yRotVal, "degrees.");
-              }
+              rotMat = new THREE.Matrix4().makeRotationY(rad);
+              console.log("Rotated in the y direction by " + strNum + " degrees.");
               break;
 
             case 'z':
-              if(zRotVal != num){
-                zRotVal = num;
-                rotMat = new THREE.Matrix4().makeRotationZ(rad);
-                console.log("Sheared in the z direction by", zRotVal, "degrees.");
-              }
+              rotMat = new THREE.Matrix4().makeRotationZ(rad);
+              console.log("Rotated in the z direction by " + strNum + " degrees.");
               break;
 
             default:
               console.log("?_? ._.");
               break;
           }
-          if(rotMat != null){
-            transformArr.push(rotMat);
-            objMesh.geometry.applyMatrix(rotMat);
-            objMesh.geometry.verticesNeedUpdate = true;
-          }
+          transformArr.push(rotMat);
+          objMesh.geometry.applyMatrix(rotMat);
+          objMesh.geometry.verticesNeedUpdate = true;
           break;
 
         default:
@@ -774,9 +687,9 @@ function handleObjectType(value){
 
       // ADJUST THE SCENE
       controls.reset();
-      objMesh.position.x = 3.5;
-      objMesh.position.y = 2;
-      objMesh.position.z = 2.5;
+      objMesh.position.x = 2.5;
+      objMesh.position.y = 1;
+      objMesh.position.z = 1.5;
       break;
 
     case 'Sphere':
@@ -820,16 +733,19 @@ function handleObjectType(value){
     case 'File':
       document.getElementById('fileInput').click();
       fileInput.type = 'file';
-      fileInput.addEventListener('change', function(ev){ readFileByType(ev); }, false);
+      fileInput.addEventListener('change', function(){
+        displayLoadScreen();
+        setTimeout(readFileByType, 500);
+      }, false);
       break;
 
     default:
       console.log("How'd you get here? HAX!");
       break;
   }
-  camera.position.x = 25;
-  camera.position.y = 25;
-  camera.position.z = 25;
+  camera.position.x = 15;
+  camera.position.y = 15;
+  camera.position.z = 15;
 }
 
 function handleLightChange(value, isOn, lightCol, lightObj, xLight, yLight, zLight){
@@ -862,6 +778,12 @@ function handleLightChange(value, isOn, lightCol, lightObj, xLight, yLight, zLig
   }
 }
 
+function handleGridSize(value, grid1, grid2){
+  grid1.resize(value, value);
+  grid2.resize(value, value);
+  grid2._rotateText('z', -Math.PI/2);
+}
+
 function handleGridOpacity(value, grid1, grid2){
   if(value == 0.0){
     grid1.toggle(false);
@@ -875,6 +797,15 @@ function handleGridOpacity(value, grid1, grid2){
     grid1.setOpacity(value);
     grid2.setOpacity(value);
   }
+}
+
+function handleTextColor(value, textCol, grid1, grid2){
+  var decToHex = value.toString(16);
+  var hexStr1 = ('#' + decToHex);
+  var hexStr2 = ('0x' + decToHex);
+  textCol.setHex(hexStr2);
+  grid1.setTextColor(hexStr1);
+  grid2.setTextColor(hexStr1);
 }
 
 function handleGridColor(val, gridCol, grid1, grid2){
@@ -893,36 +824,142 @@ function handleColorChange(color){
 	};
 }
 
-function stringToNum(input){
+function exprToNum(input){
+  // Check if the input is a valid expression
+  var checkInput = input;
+  var piInd = checkInput.indexOf("pi");
+  var eInd = checkInput.indexOf("e");
+  var addInd = checkInput.indexOf("+");
+  var subInd = checkInput.indexOf("-");
+  var multInd = checkInput.indexOf("*");
+  var divInd = checkInput.indexOf("/");
+  var deciInd = checkInput.indexOf(".");
+  var invalInput = false;
+
+  if((divInd != -1 && divInd != 0 && divInd != checkInput.length) || (multInd != -1 && multInd != 0 &&
+    multInd != checkInput.length) || (subInd != -1 && subInd != 0 && subInd != checkInput.length) ||
+    (addInd != -1 && addInd != 0 && addInd != checkInput.length) || (deciInd != -1) || (piInd != -1) || (eInd != -1)){
+
+    while(piInd != -1){
+      piInd = checkInput.indexOf("pi");
+      checkInput = checkInput.replace("pi", Math.PI.toString());
+    }
+    while(eInd != -1){
+      eInd = checkInput.indexOf("e");
+      checkInput = checkInput.replace("e", Math.E.toString());
+    }
+
+    var prevDeciInd;
+    deciInd = checkInput.indexOf(".");
+    while(deciInd != -1){
+      deciInd = checkInput.indexOf(".");
+      if(deciInd == prevDeciInd){
+        invalInput = true;
+        break;
+      }
+      checkInput = checkInput.replace(".", '');
+      prevDeciInd = deciInd;
+    }
+
+    var prevAddInd;
+    while(addInd != -1){
+      addInd = checkInput.indexOf("+");
+      if(addInd == prevAddInd){
+        invalInput = true;
+        break;
+      }
+      checkInput = checkInput.replace("+", '');
+      prevAddInd = addInd;
+    }
+
+    var prevSubInd;
+    while(subInd != -1){
+      subInd = checkInput.indexOf("-");
+      if(subInd == prevSubInd){
+        invalInput = true;
+        break;
+      }
+      checkInput = checkInput.replace("-", '');
+      prevSubInd = subInd;
+    }
+
+    var prevMultInd;
+    while(multInd != -1){
+      multInd = checkInput.indexOf("*");
+      if(multInd == prevMultInd){
+        invalInput = true;
+        break;
+      }
+      checkInput = checkInput.replace("*", '');
+      prevMultInd = multInd;
+    }
+
+    var prevDivInd;
+    while(divInd != -1){
+      divInd = checkInput.indexOf("/");
+      if(divInd == prevDivInd){
+        invalInput = true;
+        break;
+      }
+      checkInput = checkInput.replace("/", '');
+      prevDivInd = divInd;
+    }
+
+    if(invalInput){
+      console.log("Error, invalid input.");
+      return;
+    }
+    
+    if(/^\d+$/.test(checkInput)){
+
+      var piInd = input.indexOf("pi");
+      while(piInd != -1){
+        if(piInd != 0 && /^\d+$/.test(input[piInd-1]) && /^\d+$/.test(input[piInd+2])){
+          input = input.replace("pi", "*" + Math.PI.toString() + "*");
+        }
+        else if(piInd != 0 && /^\d+$/.test(input[piInd-1])){
+          input = input.replace("pi", "*" + Math.PI.toString());
+        }
+        else if(/^\d+$/.test(input[piInd+2])){
+          input = input.replace("pi", Math.PI.toString() + "*");
+        }
+        else{
+          input = input.replace("pi", Math.PI.toString());
+        }
+
+        piInd = input.indexOf("pi");
+      }
+
+      var eInd = input.indexOf("e");
+      while(eInd != -1){
+        if(eInd != 0 && /^\d+$/.test(input[eInd-1]) && /^\d+$/.test(input[eInd+2])){
+          input = input.replace("e", "*" + Math.E.toString() + "*");
+        }
+        else if(eInd != 0 && /^\d+$/.test(input[eInd-1])){
+          input = input.replace("e", "*" + Math.E.toString());
+        }
+        else if(/^\d+$/.test(input[eInd+2])){
+          input = input.replace("e", Math.E.toString() + "*");
+        }
+        else{
+          input = input.replace("e", Math.E.toString());
+        }
+
+        eInd = input.indexOf("e");
+      }
+
+      if(isFinite(eval(input))){
+        return eval(input);
+      }
+      else{
+        console.log("Error, division by zero.");
+      }
+    }
+  }
   if(!isNaN(input)){
     return +input;
   }
-}
-/*
-function isGltf1(contents){
-  var resultContent;
-
-  if(typeof contents === 'string'){
-    // contents is a JSON string
-    resultContent = contents;
-  }
   else{
-    var magic = THREE.LoaderUtils.decodeText(new Uint8Array(contents, 0, 4));
-
-    if(magic === 'glTF'){
-      // contents is a .glb file; extract the version
-      var version = new DataView(contents).getUint32(4, true);
-      return version < 2;
-    }
-    else{
-      // contents is a .gltf file
-      resultContent = THREE.LoaderUtils.decodeText(new Uint8Array(contents));
-    }
+    console.log("Error, "+ input + " is not a number.");
   }
-
-  var json = JSON.parse(resultContent);
-
-  return (json.asset != undefined && json.asset.version[0] < 2);
-
 }
-*/
