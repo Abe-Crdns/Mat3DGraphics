@@ -24,10 +24,11 @@ function init(){
   var canvas = document.getElementById('canvas1');
   renderer = new THREE.WebGLRenderer({canvas: canvas}, {antialias: true});
   renderer.setClearColor(0xA0A0A0);
-  renderer.setSize(500, 500);
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  document.body.appendChild( renderer.domElement );
 
   // CAMERA & SCENE
-  camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+  camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
   scene = new THREE.Scene();
 
   // CAMERA CONTROLS

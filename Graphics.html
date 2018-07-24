@@ -5,37 +5,21 @@
 		<title>Mat3D</title>
 
 		<style>
-			body{
-				margin: 0;
-				background-image: url("MatrixBackground.jpg");
+
+			body { margin: 0; }
+			canvas{
+				margin-top: -19px;
+				margin-bottom: -10px;
 			}
 			#container{
 				position: relative;
 			}
 			#container canvas, #content{
 				position: absolute;
-				left: 400px;
 			}
-			#a_gui{
+			#container canvas, #a_gui{
 				position: absolute;
-				left: 910px;
-				top: 0px;
-			}
-			#log{
-				position: absolute;
-				height: 100px;
-				width: 490px;
-				top: 510px;
-				left: 400px;
-				overflow: scroll;
-				border: 2px solid dimgray;
-				background-color: black;
-				list-style-type: none;
-				font-family: 'Roboto Mono', monospace;
-				color: lightgray;
-				font-size: 14px;
-				line-height: 15px;
-				padding-left: 5px;
+				left: 1035px;
 			}
 
 		</style>
@@ -55,25 +39,9 @@
 
 		<div class="container">
 			<div id="content"></div>
-			<canvas id="canvas1" style="left: 50%; margin-left:400px;"></canvas>
+			<div id="a_gui"></div>
+			<canvas id="canvas1"></canvas>
+			<input type="file" id="fileInput" style="visibility:hidden"/>
 		</div>
-		<div id="a_gui"></div>
-		<input type="file" id="fileInput" style="visibility:hidden"/>
-		<div id="log"></div>
-
-		<script>
-			(function(){
-				var old = console.log;
-				var logger = document.getElementById('log');
-				console.log = function(message){
-					if(typeof message == 'object'){
-						logger.innerHTML += (JSON && JSON.stringify ? JSON.stringify(message) : message) + '<br />';
-					}
-					else{
-						logger.innerHTML += message + '<br />';
-					}
-				}
-			})();
-		</script>
 	</body>
 </html>

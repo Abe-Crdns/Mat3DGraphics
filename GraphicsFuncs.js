@@ -220,8 +220,7 @@ function removeObjByType(){
     removeEntity(objMesh, scene);
   }
   transformArr = [];
-  //console.clear();
-  document.getElementById("log").innerHTML = "";
+  console.clear();
   object = null; objMesh = null;
 }
 
@@ -231,8 +230,8 @@ function removeObjByType(){
 function displayLoadScreen(){
   document.getElementById("content").innerHTML =
   '<object id="loadScreen" type="text/html" data="loadingScreen/index.html"></object>';
-  document.getElementById('loadScreen').setAttribute("height", 500);
-  document.getElementById('loadScreen').setAttribute("width", 500);
+  document.getElementById('loadScreen').setAttribute("height", window.innerHeight);
+  document.getElementById('loadScreen').setAttribute("width", window.innerWidth);
 }
 
 /**
@@ -485,8 +484,7 @@ function resetTransfms(){
   camera.position.z = 15;
 
   transformArr = [];
-  //console.clear();
-  document.getElementById("log").innerHTML = "";
+  console.clear();
 }
 
 /**
