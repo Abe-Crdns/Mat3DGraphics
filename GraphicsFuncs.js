@@ -351,9 +351,9 @@ function loadGuiTransfms(gui){
   // TRANSLATE
   var translateFldr = transformFldr.addFolder('Translate');
   var translateData = function(){
-    this.x = '0';
-    this.y = '0';
-    this.z = '0';
+    this.x = 0;
+    this.y = 0;
+    this.z = 0;
   };
   var transData = new translateData();
   var xTrans = translateFldr.add(transData, 'x');
@@ -366,9 +366,9 @@ function loadGuiTransfms(gui){
   // SCALE
   var scaleFldr = transformFldr.addFolder('Scale');
   var scaleData = function(){
-    this.x = '0';
-    this.y = '0';
-    this.z = '0';
+    this.x = 0;
+    this.y = 0;
+    this.z = 0;
   };
   var scleData = new scaleData();
   var xScale = scaleFldr.add(scleData, 'x');
@@ -381,9 +381,9 @@ function loadGuiTransfms(gui){
   // SHEAR
   var shearFldr = transformFldr.addFolder('Shear');
   var shearData = function(){
-    this.x = '0';
-    this.y = '0';
-    this.z = '0';
+    this.x = 0;
+    this.y = 0;
+    this.z = 0;
   };
   var shrData = new shearData();
   var xShear = shearFldr.add(shrData, 'x');
@@ -396,9 +396,9 @@ function loadGuiTransfms(gui){
   // ROTATION
   var rotatFldr = transformFldr.addFolder('Rotation');
   var rotatData = function(){
-    this.x = '0';
-    this.y = '0';
-    this.z = '0';
+    this.x = 0;
+    this.y = 0;
+    this.z = 0;
   };
   var rotData = new rotatData();
   var xRot = rotatFldr.add(rotData, 'x');
@@ -426,8 +426,8 @@ function loadGuiCoordSys(gui){
     'opacity': opacityXYVal,
     'size': GridSizes,
   };
-  xyFldr.addColor(xyData, 'Grid color').onChange(function(value){ handleGridColor(value, GridXYCol, GridXY1, GridXY2) });
-  xyFldr.addColor(xyData, 'Text color').onChange(function(value){ handleTextColor(value, textColXY, GridXY1, GridXY2) });
+  xyFldr.addColor(xyData, 'Grid color').onChange(function(value){ handleGridColor(value, GridXYCol, GridXY) });
+  xyFldr.addColor(xyData, 'Text color').onChange(function(value){ handleTextColor(value, textColXY, GridXY) });
   var xyOpacity = xyFldr.add(xyData, 'opacity' ).min(0).max(1).step(0.01).name('Opacity').listen();
   xyOpacity.onChange(function(value){ handleGridOpacity(value, GridXY1, GridXY2) });
   var xySize = xyFldr.add(xyData, 'size' ).min(10).max(500).step(5).name('Size').listen();
@@ -442,8 +442,8 @@ function loadGuiCoordSys(gui){
     'Opacity': opacityXZVal,
     'Size': GridSizes
   };
-  xzFldr.addColor(xzData, 'Grid color').onChange(function(value){ handleGridColor(value, GridXZCol, GridXZ1, GridXZ2) });
-  xzFldr.addColor(xzData, 'Text color').onChange(function(value){ handleTextColor(value, textColXZ, GridXZ1, GridXZ2) });
+  xzFldr.addColor(xzData, 'Grid color').onChange(function(value){ handleGridColor(value, GridXZCol, GridXZ) });
+  xzFldr.addColor(xzData, 'Text color').onChange(function(value){ handleTextColor(value, textColXZ, GridXZ) });
   var xzOpacity = xzFldr.add(xzData, 'Opacity' ).min(0).max(1).step(0.01).name('Opacity').listen();
   xzOpacity.onChange(function(value){ handleGridOpacity(value, GridXZ1, GridXZ2) });
   var xzSize = xzFldr.add(xzData, 'Size' ).min(10).max(500).step(5).name('Size').listen();
@@ -458,8 +458,8 @@ function loadGuiCoordSys(gui){
     'Opacity': opacityYZVal,
     'Size': GridSizes
   };
-  yzFldr.addColor(yzData, 'Grid color').onChange(function(value){ handleGridColor(value, GridYZCol, GridYZ1, GridYZ2) });
-  yzFldr.addColor(yzData, 'Text color').onChange(function(value){ handleTextColor(value, textColYZ, GridYZ1, GridYZ2) });
+  yzFldr.addColor(yzData, 'Grid color').onChange(function(value){ handleGridColor(value, GridYZCol, GridYZ) });
+  yzFldr.addColor(yzData, 'Text color').onChange(function(value){ handleTextColor(value, textColYZ, GridYZ) });
   var yzOpacity = yzFldr.add(yzData, 'Opacity' ).min(0).max(1).step(0.01).name('Opacity').listen();
   yzOpacity.onChange(function(value){ handleGridOpacity(value, GridYZ1, GridYZ2) });
   var yzSize = yzFldr.add(yzData, 'Size' ).min(10).max(500).step(5).name('Size').listen();
@@ -574,137 +574,135 @@ function handleLightPos(value, lightType, dir){
  * @param {string} - Specifies the transformation type.
  * @param {string} - Specifies which direction to apply the transformation.
  */
-function handleTransfm(value, transformType, dir){
-  var num = exprToNum(value);
-  if(num != null){
-    if(num == 0){
-      return;
-    }
-    else if((transformType == 'translate' || transformType == 'scale' || transformType == 'shear') && num > 250){
-      console.log("Error, can not apply a " + transformType + " transformation larger than 250 units.");
-      return;
-    }
-    else{
-      var strNum = num.toString();
-      switch(transformType){
-        case 'translate':
-          var transMat;
+function handleTransfm(num, transformType, dir){
+
+  if(num == 0){
+    return;
+  }
+  else if((transformType == 'translate' || transformType == 'scale' || transformType == 'shear') && num > 250){
+    console.log("Error, can not apply a " + transformType + " transformation larger than 250 units.");
+    return;
+  }
+  else{
+    var strNum = num.toString();
+    switch(transformType){
+      case 'translate':
+        var transMat;
+        switch(dir){
+          case 'x':
+            transMat = new THREE.Matrix4().makeTranslation(num, 0, 0);
+            console.log("Translated in the x direction by " + strNum + " units.");
+            break;
+
+          case 'y':
+            transMat = new THREE.Matrix4().makeTranslation(0, num, 0);
+            console.log("Translated in the y direction by " + strNum + " units.");
+            break;
+
+          case 'z':
+            transMat = new THREE.Matrix4().makeTranslation(0, 0, num);
+            console.log("Translated in the z direction by " + strNum + " units.");
+            break;
+
+          default:
+            console.log("?_? ._.");
+            break;
+        }
+        transformArr.push(transMat);
+        objMesh.geometry.applyMatrix(transMat);
+        objMesh.geometry.verticesNeedUpdate = true;
+        break;
+
+      case 'scale':
+        var scaleMat;
+        switch(dir){
+          case 'x':
+            scaleMat = new THREE.Matrix4().makeScale(num, 1, 1);
+            console.log("Scaled in the x direction by " + strNum + " units.");
+            break;
+
+          case 'y':
+            scaleMat = new THREE.Matrix4().makeScale(1, num, 1);
+            console.log("Scaled in the y direction by " + strNum + " units.");
+            break;
+
+          case 'z':
+            scaleMat = new THREE.Matrix4().makeScale(1, 1, num);
+            console.log("Scaled in the z direction by " + strNum + " units.");
+            break;
+
+          default:
+            console.log("?_? ._.");
+            break;
+        }
+        transformArr.push(scaleMat);
+        objMesh.geometry.applyMatrix(scaleMat);
+        objMesh.geometry.verticesNeedUpdate = true;
+        break;
+
+      case 'shear':
+        var shearMat;
+        if(fileInput.files[0] != null){
+          console.log("Due to a bug, shear is disabled in file mode, sorry!");
+        }
+        else{
           switch(dir){
             case 'x':
-              transMat = new THREE.Matrix4().makeTranslation(num, 0, 0);
-              console.log("Translated in the x direction by " + strNum + " units.");
+              shearMat = new THREE.Matrix4().makeShear(num, 0, 0);
+              console.log("Sheared in the x direction by " + strNum + " units.");
               break;
 
             case 'y':
-              transMat = new THREE.Matrix4().makeTranslation(0, num, 0);
-              console.log("Translated in the y direction by " + strNum + " units.");
+              shearMat = new THREE.Matrix4().makeShear(0, num, 0);
+              console.log("Sheared in the y direction by " + strNum + " units.");
               break;
 
             case 'z':
-              transMat = new THREE.Matrix4().makeTranslation(0, 0, num);
-              console.log("Translated in the z direction by " + strNum + " units.");
+              shearMat = new THREE.Matrix4().makeShear(0, 0, num);
+              console.log("Sheared in the z direction by " + strNum + " units.");
               break;
 
             default:
               console.log("?_? ._.");
               break;
           }
-          transformArr.push(transMat);
-          objMesh.geometry.applyMatrix(transMat);
+          transformArr.push(shearMat);
+          objMesh.geometry.applyMatrix(shearMat);
           objMesh.geometry.verticesNeedUpdate = true;
-          break;
+        }
+        break;
 
-        case 'scale':
-          var scaleMat;
-          switch(dir){
-            case 'x':
-              scaleMat = new THREE.Matrix4().makeScale(num, 1, 1);
-              console.log("Scaled in the x direction by " + strNum + " units.");
-              break;
+      case 'rotation':
+        var rotMat;
+        var rad = num * (Math.PI/180);
+        switch(dir){
+          case 'x':
+            rotMat = new THREE.Matrix4().makeRotationX(rad);
+            console.log("Rotated in the x direction by " + strNum + " degrees.");
+            break;
 
-            case 'y':
-              scaleMat = new THREE.Matrix4().makeScale(1, num, 1);
-              console.log("Scaled in the y direction by " + strNum + " units.");
-              break;
+          case 'y':
+            rotMat = new THREE.Matrix4().makeRotationY(rad);
+            console.log("Rotated in the y direction by " + strNum + " degrees.");
+            break;
 
-            case 'z':
-              scaleMat = new THREE.Matrix4().makeScale(1, 1, num);
-              console.log("Scaled in the z direction by " + strNum + " units.");
-              break;
+          case 'z':
+            rotMat = new THREE.Matrix4().makeRotationZ(rad);
+            console.log("Rotated in the z direction by " + strNum + " degrees.");
+            break;
 
-            default:
-              console.log("?_? ._.");
-              break;
-          }
-          transformArr.push(scaleMat);
-          objMesh.geometry.applyMatrix(scaleMat);
-          objMesh.geometry.verticesNeedUpdate = true;
-          break;
+          default:
+            console.log("?_? ._.");
+            break;
+        }
+        transformArr.push(rotMat);
+        objMesh.geometry.applyMatrix(rotMat);
+        objMesh.geometry.verticesNeedUpdate = true;
+        break;
 
-        case 'shear':
-          var shearMat;
-          if(fileInput.files[0] != null){
-            console.log("Due to a bug, shear is disabled in file mode, sorry!");
-          }
-          else{
-            switch(dir){
-              case 'x':
-                shearMat = new THREE.Matrix4().makeShear(num, 0, 0);
-                console.log("Sheared in the x direction by " + strNum + " units.");
-                break;
-
-              case 'y':
-                shearMat = new THREE.Matrix4().makeShear(0, num, 0);
-                console.log("Sheared in the y direction by " + strNum + " units.");
-                break;
-
-              case 'z':
-                shearMat = new THREE.Matrix4().makeShear(0, 0, num);
-                console.log("Sheared in the z direction by " + strNum + " units.");
-                break;
-
-              default:
-                console.log("?_? ._.");
-                break;
-            }
-            transformArr.push(shearMat);
-            objMesh.geometry.applyMatrix(shearMat);
-            objMesh.geometry.verticesNeedUpdate = true;
-          }
-          break;
-
-        case 'rotation':
-          var rotMat;
-          var rad = num * (Math.PI/180);
-          switch(dir){
-            case 'x':
-              rotMat = new THREE.Matrix4().makeRotationX(rad);
-              console.log("Rotated in the x direction by " + strNum + " degrees.");
-              break;
-
-            case 'y':
-              rotMat = new THREE.Matrix4().makeRotationY(rad);
-              console.log("Rotated in the y direction by " + strNum + " degrees.");
-              break;
-
-            case 'z':
-              rotMat = new THREE.Matrix4().makeRotationZ(rad);
-              console.log("Rotated in the z direction by " + strNum + " degrees.");
-              break;
-
-            default:
-              console.log("?_? ._.");
-              break;
-          }
-          transformArr.push(rotMat);
-          objMesh.geometry.applyMatrix(rotMat);
-          objMesh.geometry.verticesNeedUpdate = true;
-          break;
-
-        default:
-          console.log("NANI?!");
-          break;
-      }
+      default:
+        console.log("?_?");
+        break;
     }
   }
 
@@ -901,14 +899,12 @@ function handleGridOpacity(value, grid1, grid2){
  * @param {LabeledGrid}
  * @param {LabeledGrid}
  */
-function handleTextColor(value, textCol, grid1, grid2){
+function handleTextColor(value, textCol, grid){
   var decToHex = value.toString(16);
   var hexStr1 = ('#' + decToHex);
   var hexStr2 = ('0x' + decToHex);
   textCol.setHex(hexStr2);
-  grid1.setTextColor(hexStr1);
-  grid2.setTextColor(hexStr1);
-  grid2._textRotateZ(-Math.PI/2);
+  grid.setTextColor(hexStr1);
 }
 
 /**
@@ -919,11 +915,10 @@ function handleTextColor(value, textCol, grid1, grid2){
  * @param {LabeledGrid}
  * @param {LabeledGrid}
  */
-function handleGridColor(val, gridCol, grid1, grid2){
+function handleGridColor(val, gridCol, grid){
   var hexStr = ('0x' + val.toString(16));
   gridCol.setHex(hexStr);
-  grid1.setColor(gridCol.getHex());
-  grid2.setColor(gridCol.getHex());
+  grid.setColor(gridCol.getHex());
 }
 
 /**
@@ -938,157 +933,4 @@ function handleLightColor(color){
     }
     color.setHex(value);
 	};
-}
-
-/**
- * Determines if a given string input is a valid expression and returns the value of
- * that expression if it is valid.
- *
- * @param {string} - The string to check for an expression.
- * @returns {number} - The value of a valid expression.
- */
-function exprToNum(input){
-  // Check if the input is a valid expression
-  var checkInput = input;
-  var prnthesesInd1 = checkInput.indexOf("(");
-  var prnthesesInd2 = checkInput.indexOf(")");
-  var piInd = checkInput.indexOf("pi");
-  var eInd = checkInput.indexOf("e");
-  var addInd = checkInput.indexOf("+");
-  var subInd = checkInput.indexOf("-");
-  var multInd = checkInput.indexOf("*");
-  var divInd = checkInput.indexOf("/");
-  var deciInd = checkInput.indexOf(".");
-  var invalInput = false;
-
-  if((divInd != -1 && divInd != 0 && divInd != checkInput.length) || (multInd != -1 && multInd != 0 &&
-    multInd != checkInput.length) || (subInd != -1 && subInd != 0 && subInd != checkInput.length) ||
-    (addInd != -1 && addInd != 0 && addInd != checkInput.length) || (deciInd != -1) || (piInd != -1) ||
-    (eInd != -1) || ((prnthesesInd1 != -1) && (prnthesesInd2 != -1))){
-
-    while(prnthesesInd1 != -1 && prnthesesInd2 != -1){
-      prnthesesInd1 = checkInput.indexOf("(");
-      prnthesesInd2 = checkInput.indexOf(")");
-      checkInput = checkInput.replace("(", '');
-      checkInput = checkInput.replace(")", '');
-    }
-
-    while(piInd != -1){
-      piInd = checkInput.indexOf("pi");
-      checkInput = checkInput.replace("pi", Math.PI.toString());
-    }
-
-    while(eInd != -1){
-      eInd = checkInput.indexOf("e");
-      checkInput = checkInput.replace("e", Math.E.toString());
-    }
-
-    var prevDeciInd;
-    deciInd = checkInput.indexOf(".");
-    while(deciInd != -1){
-      deciInd = checkInput.indexOf(".");
-      if(deciInd == prevDeciInd){
-        invalInput = true;
-        break;
-      }
-      checkInput = checkInput.replace(".", '');
-      prevDeciInd = deciInd;
-    }
-
-    var prevAddInd;
-    while(addInd != -1){
-      addInd = checkInput.indexOf("+");
-      if(addInd == prevAddInd){
-        invalInput = true;
-        break;
-      }
-      checkInput = checkInput.replace("+", '');
-      prevAddInd = addInd;
-    }
-
-    var prevSubInd;
-    while(subInd != -1){
-      subInd = checkInput.indexOf("-");
-      if(subInd == prevSubInd){
-        invalInput = true;
-        break;
-      }
-      checkInput = checkInput.replace("-", '');
-      prevSubInd = subInd;
-    }
-
-    var prevMultInd;
-    while(multInd != -1){
-      multInd = checkInput.indexOf("*");
-      if(multInd == prevMultInd){
-        invalInput = true;
-        break;
-      }
-      checkInput = checkInput.replace("*", '');
-      prevMultInd = multInd;
-    }
-
-    var prevDivInd;
-    while(divInd != -1){
-      divInd = checkInput.indexOf("/");
-      if(divInd == prevDivInd){
-        invalInput = true;
-        break;
-      }
-      checkInput = checkInput.replace("/", '');
-      prevDivInd = divInd;
-    }
-
-    if(/^\d+$/.test(checkInput) && !invalInput){
-
-      var piInd = input.indexOf("pi");
-      while(piInd != -1){
-        if(piInd != 0 && /^\d+$/.test(input[piInd-1]) && /^\d+$/.test(input[piInd+2])){
-          input = input.replace("pi", "*" + Math.PI.toString() + "*");
-        }
-        else if(piInd != 0 && /^\d+$/.test(input[piInd-1])){
-          input = input.replace("pi", "*" + Math.PI.toString());
-        }
-        else if(/^\d+$/.test(input[piInd+2])){
-          input = input.replace("pi", Math.PI.toString() + "*");
-        }
-        else{
-          input = input.replace("pi", Math.PI.toString());
-        }
-
-        piInd = input.indexOf("pi");
-      }
-
-      var eInd = input.indexOf("e");
-      while(eInd != -1){
-        if(eInd != 0 && /^\d+$/.test(input[eInd-1]) && /^\d+$/.test(input[eInd+2])){
-          input = input.replace("e", "*" + Math.E.toString() + "*");
-        }
-        else if(eInd != 0 && /^\d+$/.test(input[eInd-1])){
-          input = input.replace("e", "*" + Math.E.toString());
-        }
-        else if(/^\d+$/.test(input[eInd+2])){
-          input = input.replace("e", Math.E.toString() + "*");
-        }
-        else{
-          input = input.replace("e", Math.E.toString());
-        }
-
-        eInd = input.indexOf("e");
-      }
-
-      if(isFinite(eval(input))){
-        return eval(input);
-      }
-      else{
-        console.log("Error, division by zero.");
-      }
-    }
-  }
-  if(!isNaN(input)){
-    return +input;
-  }
-  else{
-    console.log("Error, "+ input + " is not a number.");
-  }
 }
