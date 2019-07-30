@@ -1,22 +1,62 @@
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+var _createClass = function(){
+  function defineProperties(target, props){
+    for(var i = 0; i < props.length; i++){
+      var descriptor = props[i];
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+      if("value" in descriptor)
+        descriptor.writable = true;
+
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+  return function(Constructor, protoProps, staticProps){
+    if(protoProps)
+      defineProperties(Constructor.prototype, protoProps);
+
+    if(staticProps)
+      defineProperties(Constructor, staticProps);
+    return Constructor;
+  };
+}();
+
+function _classCallCheck(instance, Constructor){
+  if(!(instance instanceof Constructor)){
+    throw new TypeError("Cannot call a class as a function");
+  }
+}
+
+function _possibleConstructorReturn(self, call){
+  if(!self){
+    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+  }
+  return call && (typeof call === "object" || typeof call === "function") ? call : self;
+}
+
+function _inherits(subClass, superClass){
+  if(typeof superClass !== "function" && superClass !== null){
+    throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
+  }
+  subClass.prototype = Object.create(superClass && superClass.prototype,
+                                     { constructor: { value: subClass,
+                                                      enumerable: false,
+                                                      writable: true,
+                                                      configurable: true
+                                                    }
+                                      });
+  if(superClass)
+    Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
+}
 
 // Source: https://github.com/usco/glView-helpers/blob/master/src/grids/LabeledGrid.js
 
-/*TODO:
- - refactor
- - use label helper
-*/
-
-var LabeledGrid = function (_THREE$Object3D) {
+var LabeledGrid = function(_THREE$Object3D){
   _inherits(LabeledGrid, _THREE$Object3D);
 
-  function LabeledGrid() {
+  function LabeledGrid(){
     var width = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 200;
     var length = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 200;
     var step = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 100;
@@ -58,8 +98,9 @@ var LabeledGrid = function (_THREE$Object3D) {
 
   _createClass(LabeledGrid, [{
     key: "_drawGrid",
-    value: function _drawGrid() {
-      var gridGeometry, gridMaterial, mainGridZ, planeFragmentShader, planeGeometry, planeMaterial, subGridGeometry, subGridMaterial, subGridZ;
+    value: function _drawGrid(){
+      var gridGeometry, gridMaterial, mainGridZ, planeFragmentShader,
+          planeGeometry, planeMaterial, subGridGeometry, subGridMaterial, subGridZ;
 
       //offset to avoid z fighting
       mainGridZ = 0;
@@ -84,7 +125,7 @@ var LabeledGrid = function (_THREE$Object3D) {
       var width = this.width;
       var length = this.length;
 
-      var centerBased = true;
+      var centerBased = false;
 
       if (centerBased) {
         for (var i = 0; i <= width / 2; i += step / stepSubDivisions) {
@@ -118,22 +159,22 @@ var LabeledGrid = function (_THREE$Object3D) {
           }
         }
       } else {
-        for (var i = -width / 2; i <= width / 2; i += step / stepSubDivisions) {
-          subGridGeometry.vertices.push(new THREE.Vector3(-length / 2, i, subGridZ));
+        for (var i = -width / 2; i <= 0; i += step / stepSubDivisions) {
+          subGridGeometry.vertices.push(new THREE.Vector3(0, i, subGridZ));
           subGridGeometry.vertices.push(new THREE.Vector3(length / 2, i, subGridZ));
 
           if (i % step == 0) {
-            gridGeometry.vertices.push(new THREE.Vector3(-length / 2, i, mainGridZ));
+            gridGeometry.vertices.push(new THREE.Vector3(0, i, mainGridZ));
             gridGeometry.vertices.push(new THREE.Vector3(length / 2, i, mainGridZ));
           }
         }
-        for (var i = -length / 2; i <= length / 2; i += step / stepSubDivisions) {
+        for (var i = 0; i <= length / 2; i += step / stepSubDivisions) {
           subGridGeometry.vertices.push(new THREE.Vector3(i, -width / 2, subGridZ));
-          subGridGeometry.vertices.push(new THREE.Vector3(i, width / 2, subGridZ));
+          subGridGeometry.vertices.push(new THREE.Vector3(i, 0, subGridZ));
 
           if (i % step == 0) {
             gridGeometry.vertices.push(new THREE.Vector3(i, -width / 2, mainGridZ));
-            gridGeometry.vertices.push(new THREE.Vector3(i, width / 2, mainGridZ));
+            gridGeometry.vertices.push(new THREE.Vector3(i, 0, mainGridZ));
           }
         }
       }
@@ -147,18 +188,22 @@ var LabeledGrid = function (_THREE$Object3D) {
       var offsetLength = length + this.marginSize;
 
       var marginGeometry = new THREE.Geometry();
-      marginGeometry.vertices.push(new THREE.Vector3(-length / 2, -width / 2, subGridZ));
+      marginGeometry.vertices.push(new THREE.Vector3(0, -width / 2, subGridZ));
       marginGeometry.vertices.push(new THREE.Vector3(length / 2, -width / 2, subGridZ));
 
       marginGeometry.vertices.push(new THREE.Vector3(length / 2, -width / 2, subGridZ));
-      marginGeometry.vertices.push(new THREE.Vector3(length / 2, width / 2, subGridZ));
+      marginGeometry.vertices.push(new THREE.Vector3(length / 2, 0, subGridZ));
 
+
+      /*
       marginGeometry.vertices.push(new THREE.Vector3(length / 2, width / 2, subGridZ));
       marginGeometry.vertices.push(new THREE.Vector3(-length / 2, width / 2, subGridZ));
 
       marginGeometry.vertices.push(new THREE.Vector3(-length / 2, width / 2, subGridZ));
       marginGeometry.vertices.push(new THREE.Vector3(-length / 2, -width / 2, subGridZ));
+      */
 
+      /*
       marginGeometry.vertices.push(new THREE.Vector3(-offsetLength / 2, -offsetWidth / 2, subGridZ));
       marginGeometry.vertices.push(new THREE.Vector3(offsetLength / 2, -offsetWidth / 2, subGridZ));
 
@@ -170,6 +215,7 @@ var LabeledGrid = function (_THREE$Object3D) {
 
       marginGeometry.vertices.push(new THREE.Vector3(-offsetLength / 2, offsetWidth / 2, subGridZ));
       marginGeometry.vertices.push(new THREE.Vector3(-offsetLength / 2, -offsetWidth / 2, subGridZ));
+      */
 
       var strongGridMaterial = new THREE.LineBasicMaterial({
         color: new THREE.Color().setHex(this.color),
@@ -282,26 +328,32 @@ var LabeledGrid = function (_THREE$Object3D) {
       var numbering = this.numbering = "centerBased";
 
       var labelsFront = new THREE.Object3D();
+      /*
       var labelsBack = new THREE.Object3D();
       var labelsSideRight = new THREE.Object3D();
       var labelsSideLeft = new THREE.Object3D();
+      */
 
       if (numbering == "centerBased") {
 
         for (var i = 0; i <= width / 2; i += step) {
           var sizeLabel = this.drawTextOnPlane("" + i, 32);
-          var sizeLabel2 = this.drawTextOnPlane("" - i, 32);
+          var sizeLabel2 = this.drawTextOnPlane("" + i, 32);
+          /*
           var sizeLabel3 = sizeLabel2.clone();
           var sizeLabel4 = sizeLabel.clone();
+          */
 
           sizeLabel.position.set(length / 2, -i, 0);
           sizeLabel.rotation.z = -Math.PI / 2;
           labelsFront.add(sizeLabel);
 
-          sizeLabel2.position.set(length / 2, i, 0);
+          sizeLabel2.position.set(length / 2, -i, 0);
+          sizeLabel2.rotation.x = -Math.PI;
           sizeLabel2.rotation.z = -Math.PI / 2;
           labelsFront.add(sizeLabel2);
 
+          /*
           sizeLabel3.position.set(length / 2, -i, 0);
           sizeLabel3.rotation.z = -Math.PI/2;
           labelsBack.add(sizeLabel3);
@@ -311,9 +363,11 @@ var LabeledGrid = function (_THREE$Object3D) {
           sizeLabel4.rotation.z = -Math.PI/2;
           labelsBack.add(sizeLabel4);
           labelsBack.rotation.z = -Math.PI;
+          */
 
         }
 
+        /*
         for (var i = 0; i <= length / 2; i += step) {
           var sizeLabel = this.drawTextOnPlane("" + i, 32);
           var sizeLabel2 = this.drawTextOnPlane("" - i, 32);
@@ -334,14 +388,15 @@ var LabeledGrid = function (_THREE$Object3D) {
           labelsSideLeft.add(sizeLabel4);
           labelsSideLeft.rotation.z = -Math.PI;
         }
-
+        */
       }
 
       this.labels.add(labelsFront);
+      /*
       this.labels.add(labelsBack);
-
       this.labels.add(labelsSideRight);
       this.labels.add(labelsSideLeft);
+      */
 
       //apply visibility settings to all labels
       var textVisible = this.text;
@@ -369,7 +424,7 @@ var LabeledGrid = function (_THREE$Object3D) {
       canvas.width = size;
       canvas.height = size;
       context = canvas.getContext('2d');
-      context.font = "18px sans-serif";
+      context.font = "8px sans-serif";
       context.textAlign = 'center';
       context.fillStyle = this.textColor;
       context.fillText(text, canvas.width / 2, canvas.height / 2);
@@ -386,7 +441,7 @@ var LabeledGrid = function (_THREE$Object3D) {
         map: texture,
         transparent: true,
         color: 0xffffff,
-        alphaTest: 0.3
+        alphaTest: 0.6
       });
       plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(size / 8, size / 8), material);
       plane.doubleSided = true;
