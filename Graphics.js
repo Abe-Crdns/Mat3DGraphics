@@ -1,6 +1,6 @@
 /**
  * @author Abraham Cardenas / https://github.com/Abe-Crdns (acarde12@ucsc.edu)
- * @version 1.0
+ * @version Mat3d graphics v1.0
  */
 
 // global program variables
@@ -9,9 +9,7 @@ var ambientLight, ptLightArr = [];
 var xLight1, yLight1, zLight1;
 var xLight2, yLight2, zLight2;
 var xLight3, yLight3, zLight3;
-var GridXY1, GridXY2;
-var GridXZ1, GridXZ2;
-var GridYZ1, GridYZ2;
+var GridXY, GridXZ, GridYZ;
 var GridSizes, GridXYCol, GridXZCol, GridYZCol;
 var textColXY, textColXZ, textColYZ;
 var transformArr = [];
@@ -75,7 +73,7 @@ function init(){
   camera.position.z = 15;
 
   // DEFAULT COORDINATE SYSTEM
-  GridSizes = 30;
+  GridSizes = 20;
   GridXYCol = new THREE.Color(0x008800);
   GridXZCol = new THREE.Color(0x000088);
   GridYZCol = new THREE.Color(0x880000);
@@ -83,29 +81,17 @@ function init(){
   textColXZ = new THREE.Color(0x000000);
   textColYZ = new THREE.Color(0x000000);
 
-  GridXZ1 = new LabeledGrid(GridSizes, GridSizes, 10, [0, 1, 0], 0x000088, 0.4, true, "#000000", "left");
-  GridXZ1.name = "GridXZ1";
-  scene.add(GridXZ1);
-  GridXZ2 = new LabeledGrid(GridSizes, GridSizes, 10, [0, -1, 0], 0x000088, 0.4, true, "#000000", "left");
-  GridXZ2.name = "GridXZ2";
-  GridXZ2._textRotateZ(-Math.PI/2);
-  scene.add(GridXZ2);
+  GridXZ = new LabeledGrid(GridSizes, GridSizes, 10, [0, 1, 0], 0x000088, 0.4, true, "#000000", "left");
+  GridXZ.name = "GridXZ";
+  scene.add(GridXZ);
 
-  GridXY1 = new LabeledGrid(GridSizes, GridSizes, 10, [0, 0, 1], 0x008800, 0.4, true, "#000000", "left");
-  GridXY1.name = "GridXY1";
-  scene.add(GridXY1);
-  GridXY2 = new LabeledGrid(GridSizes, GridSizes, 10, [0, 0, -1], 0x008800, 0.4, true, "#000000", "left");
-  GridXY2.name = "GridXY2";
-  GridXY2._textRotateZ(-Math.PI/2);
-  scene.add(GridXY2);
+  GridXY = new LabeledGrid(GridSizes, GridSizes, 10, [0, 0, 1], 0x008800, 0.4, true, "#000000", "left");
+  GridXY.name = "GridXY";
+  scene.add(GridXY);
 
-  GridYZ1 = new LabeledGrid(GridSizes, GridSizes, 10, [-1, 0, 0], 0x880000, 0.4, true, "#000000", "left");
-  GridYZ1.name = "GridYZ1";
-  scene.add(GridYZ1);
-  GridYZ2 = new LabeledGrid(GridSizes, GridSizes, 10, [1, 0, 0], 0x880000, 0.4, true, "#000000", "left");
-  GridYZ2.name = "GridYZ2";
-  GridYZ2._textRotateZ(-Math.PI/2);
-  scene.add(GridYZ2);
+  GridYZ = new LabeledGrid(GridSizes, GridSizes, 10, [-1, 0, 0], 0x880000, 0.4, true, "#000000", "left");
+  GridYZ.name = "GridYZ";
+  scene.add(GridYZ);
 
   // SETUP GUI
   var gui = new dat.GUI({autoPlace: false});
