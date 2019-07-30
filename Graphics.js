@@ -5,13 +5,6 @@
 
 // global program variables
 var renderer, scene, camera, controls, objMesh, object;
-var ambientLight, ptLightArr = [];
-var xLight1, yLight1, zLight1;
-var xLight2, yLight2, zLight2;
-var xLight3, yLight3, zLight3;
-var GridXY, GridXZ, GridYZ;
-var GridSizes, GridXYCol, GridXZCol, GridYZCol;
-var textColXY, textColXZ, textColYZ;
 var transformArr = [];
 
 /**
@@ -21,7 +14,7 @@ function init(){
   // RENDERER
   var canvas = document.getElementById('canvas1');
   renderer = new THREE.WebGLRenderer({canvas: canvas}, {antialias: true});
-  renderer.setClearColor(0xA0A0A0);
+  renderer.setClearColor(0xffffff);
   renderer.setSize(window.innerWidth, window.innerHeight);
   document.body.appendChild( renderer.domElement );
 
@@ -35,31 +28,21 @@ function init(){
   controls.dampingFactor = 0.25;
   controls.enableZoom = true;
 
-  // DEFAULT LIGHTING
-  ptLightArr.push(new THREE.PointLight(0xffffff, 1, 0));
-  ptLightArr.push(new THREE.PointLight(0xffffff, 1, 0));
-  ptLightArr.push(new THREE.PointLight(0xffffff, 1, 0));
-
-  xLight1 = 0; yLight1 = 200; zLight1 = 0;
-  ptLightArr[0].position.set(xLight1, yLight1, zLight1);
-  xLight2 = 100; yLight2 = 200; zLight2 = 100;
-  ptLightArr[1].position.set(xLight2, yLight2, zLight2);
-  xLight3 = -100; yLight3 = -200; zLight3 = -100;
-  ptLightArr[2].position.set(xLight3, yLight3, zLight3);
-
-  scene.add(ptLightArr[0]);
-  scene.add(ptLightArr[1]);
-  scene.add(ptLightArr[2]);
-
-  ambientLight = new THREE.AmbientLight(0xffffff);
-  scene.add(ambientLight);
-
   // DEFAULT CUBE OBJECT
   object = new THREE.BoxGeometry(2, 2, 2);
+  var faces_cols = [0xffff00, 0x00ffff, 0xff00ff,
+                    0x4f4f4f, 0x4b0082, 0xff8c00];
+
+  var j = 0;
+  for(var i = 0; i < object.faces.length; i+=2){
+    object.faces[i].color.setHex(faces_cols[j]);
+    object.faces[i+1].color.setHex(faces_cols[j]);
+    j++
+  }
+
   object.name = 'cube1';
-  var material = new THREE.MeshStandardMaterial();
+  var material = new THREE.MeshBasicMaterial({ color: 0xffffff, vertexColors: THREE.FaceColors });
   objMesh = new THREE.Mesh(object, material);
-  objMesh.material.color.setHex(0x2194ce);
   objMesh.name = 'cube1';
   scene.add(objMesh);
 
@@ -73,23 +56,16 @@ function init(){
   camera.position.z = 15;
 
   // DEFAULT COORDINATE SYSTEM
-  GridSizes = 20;
-  GridXYCol = new THREE.Color(0x008800);
-  GridXZCol = new THREE.Color(0x000088);
-  GridYZCol = new THREE.Color(0x880000);
-  textColXY = new THREE.Color(0x000000);
-  textColXZ = new THREE.Color(0x000000);
-  textColYZ = new THREE.Color(0x000000);
-
-  GridXZ = new LabeledGrid(GridSizes, GridSizes, 10, [0, 1, 0], 0x000088, 0.4, true, "#000000", "left");
+  var GridSizes = 20;
+  var GridXZ = new LabeledGrid(GridSizes, GridSizes, 10, [0, 1, 0], 0x0000ff, 0.75, true, "#000000", "left");
   GridXZ.name = "GridXZ";
   scene.add(GridXZ);
 
-  GridXY = new LabeledGrid(GridSizes, GridSizes, 10, [0, 0, 1], 0x008800, 0.4, true, "#000000", "left");
+  var GridXY = new LabeledGrid(GridSizes, GridSizes, 10, [0, 0, 1], 0x00ff00, 0.75, true, "#000000", "left");
   GridXY.name = "GridXY";
   scene.add(GridXY);
 
-  GridYZ = new LabeledGrid(GridSizes, GridSizes, 10, [-1, 0, 0], 0x880000, 0.4, true, "#000000", "left");
+  var GridYZ = new LabeledGrid(GridSizes, GridSizes, 10, [-1, 0, 0], 0xff0000, 0.75, true, "#000000", "left");
   GridYZ.name = "GridYZ";
   scene.add(GridYZ);
 
@@ -97,33 +73,17 @@ function init(){
   var gui = new dat.GUI({autoPlace: false});
   var customContainer = document.getElementById('a_gui');
   customContainer.appendChild(gui.domElement);
-  var isAmbient = true, isLight1 = true, isLight2 = true, isLight3 = true;
 
   // PREDEFINED OBJECTS
   var objData = {
     objects: "Cube"
   };
-  var objectTypes = gui.add(objData, 'objects', [ "Cube", "Teapot", "Sphere", "Cylinder", "File" ] ).name('Object').listen();
+  var objectTypes = gui.add(objData, 'objects', [ "Cube", "Teapot", "Sphere", "Cylinder", "File" ])
+                         .name('Object').listen();
   objectTypes.onChange(function(value){ handleObjectType(value) });
-
-  var backgroundData = {
-    Background: '#A0A0A0',
-  };
-  var color = new THREE.Color();
-  var colorConvert = handleLightColor(color);
-  gui.addColor(backgroundData, 'Background').onChange(function(value){
-    colorConvert(value);
-    renderer.setClearColor(color.getHex());
-  });
-
-  // LIGHTS FOLDER
-  loadGuiLights(gui, isAmbient, isLight1, isLight2, isLight3);
 
   // TRANSFORMATIONS FOLDER
   loadGuiTransfms(gui);
-
-  // COORDINATE SYSTEM COLORS, OPACITY & SIZE
-  loadGuiCoordSys(gui);
 
   // RESET TRANSFORMATIONS
   var resetData = {
