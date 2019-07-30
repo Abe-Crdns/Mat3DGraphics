@@ -243,104 +243,6 @@ function removeLoadScreen(){
 }
 
 /**
- * Loads the different lighting options in the gui.
- *
- * @param {dat.GUI}
- * @param {boolean} - Is the ambient light on?
- * @param {boolean} - Is point light #1 on?
- * @param {boolean} - Is point light #2 on?
- * @param {boolean} - Is point light #3 on?
- */
-function loadGuiLights(gui, isAmbient, isLight1, isLight2, isLight3){
-  // LIGHTS
-  var lightsFldr = gui.addFolder('Lighting');
-
-  // AMBIENT
-  var ambientLightFldr = lightsFldr.addFolder('Ambient Light');
-  var ambientData = {
-    'Ambient on?': true,
-    'Color': ambientLight.color.getHex()
-  };
-  var ambient = ambientLightFldr.add(ambientData, 'Ambient on?').name('Ambient on?').listen();
-  ambient.onChange(function(value){
-    handleLightOnOff(value, isAmbient, ambientLight, ambientCol);
-  });
-  var ambientCol = ambientLightFldr.addColor(ambientData, 'Color').onChange(handleLightColor(ambientLight.color));
-
-  // POINT LIGHT #1
-  var light1Fldr = lightsFldr.addFolder('Point Light #1');
-  var light1Data = {
-    'Light #1 on?': true,
-    'Color': ptLightArr[0].color.getHex()
-  };
-  var light1 = light1Fldr.add(light1Data, 'Light #1 on?').name('Light #1 on?').listen();
-  light1.onChange(function(value){
-    handleLightOnOff(value, isLight1, ptLightArr[0], light1Col, xlight1Pos, ylight1Pos, zlight1Pos);
-  });
-  var light1Col = light1Fldr.addColor(light1Data, 'Color').onChange(handleLightColor(ptLightArr[0].color));
-  var light1PosFldr = light1Fldr.addFolder('Position');
-  var light1PosData = {
-    'x': xLight1,
-    'y': yLight1,
-    'z': zLight1
-  };
-  var xlight1Pos = light1PosFldr.add(light1PosData, 'x').min(-500).max(500).step(1).name('x').listen();
-  xlight1Pos.onChange(function(value){ handleLightPos(value, 'light1', 'x') });
-  var ylight1Pos = light1PosFldr.add(light1PosData, 'y').min(-500).max(500).step(1).name('y').listen();
-  ylight1Pos.onChange(function(value){ handleLightPos(value, 'light1', 'y') });
-  var zlight1Pos = light1PosFldr.add(light1PosData, 'z').min(-500).max(500).step(1).name('z').listen();
-  zlight1Pos.onChange(function(value){ handleLightPos(value, 'light1', 'z') });
-
-  // POINT LIGHT #2
-  var light2Fldr = lightsFldr.addFolder('Point Light #2');
-  var light2Data = {
-    'Light #2 on?': true,
-    'Color': ptLightArr[1].color.getHex()
-  };
-  var light2 = light2Fldr.add(light2Data, 'Light #2 on?').name('Light #2 on?').listen();
-  light2.onChange(function(value){
-    handleLightOnOff(value, isLight2, ptLightArr[1], light2Col, xlight2Pos, ylight2Pos, zlight2Pos);
-  });
-  var light2Col = light2Fldr.addColor(light2Data, 'Color').onChange(handleLightColor(ptLightArr[1].color));
-  var light2PosFldr = light2Fldr.addFolder('Position');
-  var light2PosData = {
-    'x': xLight2,
-    'y': yLight2,
-    'z': zLight2
-  };
-  var xlight2Pos = light2PosFldr.add(light2PosData, 'x').min(-500).max(500).step(1).name('x').listen();
-  xlight2Pos.onChange(function(value){ handleLightPos(value, 'light2', 'x') });
-  var ylight2Pos = light2PosFldr.add(light2PosData, 'y').min(-500).max(500).step(1).name('y').listen();
-  ylight2Pos.onChange(function(value){ handleLightPos(value, 'light2', 'y') });
-  var zlight2Pos = light2PosFldr.add(light2PosData, 'z').min(-500).max(500).step(1).name('z').listen();
-  zlight2Pos.onChange(function(value){ handleLightPos(value, 'light2', 'z') });
-
-  // POINT LIGHT #3
-  var light3Fldr = lightsFldr.addFolder('Point Light #3');
-  var light3Data = {
-    'Light #3 on?': true,
-    'Color': ptLightArr[2].color.getHex()
-  };
-  var light3 = light3Fldr.add(light3Data, 'Light #3 on?').name('Light #3 on?').listen();
-  light3.onChange(function(value){
-    handleLightOnOff(value, isLight3, ptLightArr[2], light3Col, xlight3Pos, ylight3Pos, zlight3Pos);
-  });
-  var light3Col = light3Fldr.addColor(light3Data, 'Color').onChange(handleLightColor(ptLightArr[2].color));
-  var light3PosFldr = light3Fldr.addFolder('Position');
-  var light3PosData = {
-    'x': xLight3,
-    'y': yLight3,
-    'z': zLight3
-  };
-  var xlight3Pos = light3PosFldr.add(light3PosData, 'x').min(-500).max(500).step(1).name('x').listen();
-  xlight3Pos.onChange(function(value){ handleLightPos(value, 'light3', 'x') });
-  var ylight3Pos = light3PosFldr.add(light3PosData, 'y').min(-500).max(500).step(1).name('y').listen();
-  ylight3Pos.onChange(function(value){ handleLightPos(value, 'light3', 'y') });
-  var zlight3Pos = light3PosFldr.add(light3PosData, 'z').min(-500).max(500).step(1).name('z').listen();
-  zlight3Pos.onChange(function(value){ handleLightPos(value, 'light3', 'z') });
-}
-
-/**
  * Loads the different transformation options.
  *
  * @param {dat.GUI}
@@ -410,63 +312,6 @@ function loadGuiTransfms(gui){
 }
 
 /**
- * Loads the different coordinate system options.
- *
- * @param {dat.GUI}
- */
-function loadGuiCoordSys(gui){
-  var coordFldr = gui.addFolder('Coordinate Planes');
-
-  // XY PLANE
-  var xyFldr = coordFldr.addFolder('XY Plane');
-  var opacityXYVal = 0.4;
-  var xyData = {
-    'Grid color': GridXYCol.getHex(),
-    'Text color': textColXY.getHex(),
-    'opacity': opacityXYVal,
-    'size': GridSizes,
-  };
-  xyFldr.addColor(xyData, 'Grid color').onChange(function(value){ handleGridColor(value, GridXYCol, GridXY) });
-  xyFldr.addColor(xyData, 'Text color').onChange(function(value){ handleTextColor(value, textColXY, GridXY) });
-  var xyOpacity = xyFldr.add(xyData, 'opacity' ).min(0).max(1).step(0.01).name('Opacity').listen();
-  xyOpacity.onChange(function(value){ handleGridOpacity(value, GridXY1, GridXY2) });
-  var xySize = xyFldr.add(xyData, 'size' ).min(10).max(500).step(5).name('Size').listen();
-  xySize.onChange(function(value){ handleGridSize(value, GridXY1, GridXY2) });
-
-  // XZ PLANE
-  var xzFldr = coordFldr.addFolder('XZ Plane');
-  var opacityXZVal = 0.4;
-  var xzData = {
-    'Grid color': GridXZCol.getHex(),
-    'Text color': textColXZ.getHex(),
-    'Opacity': opacityXZVal,
-    'Size': GridSizes
-  };
-  xzFldr.addColor(xzData, 'Grid color').onChange(function(value){ handleGridColor(value, GridXZCol, GridXZ) });
-  xzFldr.addColor(xzData, 'Text color').onChange(function(value){ handleTextColor(value, textColXZ, GridXZ) });
-  var xzOpacity = xzFldr.add(xzData, 'Opacity' ).min(0).max(1).step(0.01).name('Opacity').listen();
-  xzOpacity.onChange(function(value){ handleGridOpacity(value, GridXZ1, GridXZ2) });
-  var xzSize = xzFldr.add(xzData, 'Size' ).min(10).max(500).step(5).name('Size').listen();
-  xzSize.onChange(function(value){ handleGridSize(value, GridXZ1, GridXZ2) });
-
-  // YZ PLANE
-  var yzFldr = coordFldr.addFolder('YZ Plane');
-  var opacityYZVal = 0.4;
-  var yzData = {
-    'Grid color': GridYZCol.getHex(),
-    'Text color': textColYZ.getHex(),
-    'Opacity': opacityYZVal,
-    'Size': GridSizes
-  };
-  yzFldr.addColor(yzData, 'Grid color').onChange(function(value){ handleGridColor(value, GridYZCol, GridYZ) });
-  yzFldr.addColor(yzData, 'Text color').onChange(function(value){ handleTextColor(value, textColYZ, GridYZ) });
-  var yzOpacity = yzFldr.add(yzData, 'Opacity' ).min(0).max(1).step(0.01).name('Opacity').listen();
-  yzOpacity.onChange(function(value){ handleGridOpacity(value, GridYZ1, GridYZ2) });
-  var yzSize = yzFldr.add(yzData, 'Size' ).min(10).max(500).step(5).name('Size').listen();
-  yzSize.onChange(function(value){ handleGridSize(value, GridYZ1, GridYZ2) });
-}
-
-/**
  * Resets all the transformations that were applied to the current object being displayed.
  */
 function resetTransfms(){
@@ -485,86 +330,6 @@ function resetTransfms(){
 
   transformArr = [];
   console.clear();
-}
-
-/**
- * Changes the position of a given light type.
- *
- * @param {number} - The number that sets the value of the light position.
- * @param {string} - Specifies which light type needs a position change.
- * @param {string} - Specifies which direction to apply the light position change.
- */
-function handleLightPos(value, lightType, dir){
-  switch(lightType){
-    case 'light1':
-      switch(dir){
-        case 'x':
-          xLight1 = value;
-          ptLightArr[0].position.set(xLight1, yLight1, zLight1);
-          break;
-
-        case 'y':
-          yLight1 = value;
-          ptLightArr[0].position.set(xLight1, yLight1, zLight1);
-          break;
-
-        case 'z':
-          zLight1 = value;
-          ptLightArr[0].position.set(xLight1, yLight1, zLight1);
-          break;
-
-        default:
-          break;
-      }
-      break;
-
-    case 'light2':
-      switch(dir){
-        case 'x':
-          xLight2 = value;
-          ptLightArr[1].position.set(xLight2, yLight2, zLight2);
-          break;
-
-        case 'y':
-          yLight2 = value;
-          ptLightArr[1].position.set(xLight2, yLight2, zLight2);
-          break;
-
-        case 'z':
-          zLight2 = value;
-          ptLightArr[1].position.set(xLight2, yLight2, zLight2);
-          break;
-
-        default:
-          break;
-      }
-      break;
-
-    case 'light3':
-      switch(dir){
-        case 'x':
-          xLight3 = value;
-          ptLightArr[2].position.set(xLight3, yLight3, zLight3);
-          break;
-
-        case 'y':
-          yLight3 = value;
-          ptLightArr[2].position.set(xLight3, yLight3, zLight3);
-          break;
-
-        case 'z':
-          zLight3 = value;
-          ptLightArr[2].position.set(xLight3, yLight3, zLight3);
-          break;
-
-        default:
-          break;
-      }
-      break;
-
-    default:
-      break;
-  }
 }
 
 /**
@@ -810,127 +575,19 @@ function handleObjectType(objType){
 }
 
 /**
- * Turns off the given light and disables its gui options.
- *
- * @param {boolean} - The boolean to change if the light is on or off.
- * @param {boolean} - Is the given light on?
- * @param {THREE.Light}
- * @param {Object} - The object within the gui that controls the color for the
- *                   given light type.
- * @param {Object} - The object within the gui that controls the options for the
- *                   x position of a given light type (can't be ambient).
- * @param {Object} - The object within the gui that controls the options for the
- *                   y position of a given light type (can't be ambient).
- * @param {Object} - The object within the gui that controls the options for the
- *                   z position of a given light type (can't be ambient).
- */
-function handleLightOnOff(value, isOn, lightObj, lightCol, xLight, yLight, zLight){
-  isOn = value;
-  xLight = xLight || '';
-  yLight = yLight || '';
-  zLight = zLight || '';
-  if(!isOn){
-    lightObj.intensity = 0;
-    lightCol.domElement.style.pointerEvents = "none";
-    lightCol.domElement.style.opacity = 0.5;
-    if(lightObj != ambientLight){
-      xLight.domElement.style.pointerEvents = "none";
-      xLight.domElement.style.opacity = 0.5;
-      yLight.domElement.style.pointerEvents = "none";
-      yLight.domElement.style.opacity = 0.5;
-      zLight.domElement.style.pointerEvents = "none";
-      zLight.domElement.style.opacity = 0.5;
-    }
-  }
-  else if(lightCol.domElement.style.pointerEvents == "none" && isOn){
-    lightObj.intensity = 0.75;
-    lightCol.domElement.style.pointerEvents = "auto";
-    lightCol.domElement.style.opacity = 1.0;
-    if(lightObj != ambientLight){
-      xLight.domElement.style.pointerEvents = "auto";
-      xLight.domElement.style.opacity = 1.0;
-      yLight.domElement.style.pointerEvents = "auto";
-      yLight.domElement.style.opacity = 1.0;
-      zLight.domElement.style.pointerEvents = "auto";
-      zLight.domElement.style.opacity = 1.0;
-    }
-  }
-}
-
-/**
- * Changes the grid size of a given grid.
- *
- * @param {number} - The new value of the grid size of the given grid.
- * @param {LabeledGrid}
- * @param {LabeledGrid}
- */
-function handleGridSize(value, grid1, grid2){
-  grid1.resize(value, value);
-  grid2.resize(value, value);
-}
-
-/**
  * Changes the opacity of a given grid.
  *
  * @param {number} - The new value of the opacity of the given grid.
  * @param {LabeledGrid}
  * @param {LabeledGrid}
  */
-function handleGridOpacity(value, grid1, grid2){
+function handleGridOpacity(value, grid){
   if(value == 0.0){
-    grid1.toggle(false);
-    grid2.toggle(false);
+    grid.toggle(false);
   }
   else{
-    if((!grid1.getToggle()) && (!grid2.getToggle())){
-      grid1.toggle(true);
-      grid2.toggle(true);
-    }
-    grid1.setOpacity(value);
-    grid2.setOpacity(value);
+    if(!grid.getToggle())
+      grid.toggle(true);
+    grid.setOpacity(value);
   }
-}
-
-/**
- * Changes the color of the labels of a given grid.
- *
- * @param {number} - The decimal value of the new color.
- * @param {Object} - The object within the gui that controls the color for the grid labels.
- * @param {LabeledGrid}
- * @param {LabeledGrid}
- */
-function handleTextColor(value, textCol, grid){
-  var decToHex = value.toString(16);
-  var hexStr1 = ('#' + decToHex);
-  var hexStr2 = ('0x' + decToHex);
-  textCol.setHex(hexStr2);
-  grid.setTextColor(hexStr1);
-}
-
-/**
- * Changes the color of a given grid.
- *
- * @param {number} - The decimal value of the new color.
- * @param {Object} - The object within the gui that controls the color for the grid.
- * @param {LabeledGrid}
- * @param {LabeledGrid}
- */
-function handleGridColor(val, gridCol, grid){
-  var hexStr = ('0x' + val.toString(16));
-  gridCol.setHex(hexStr);
-  grid.setColor(gridCol.getHex());
-}
-
-/**
- * Changes the light color whenever the color is changed.
- *
- * @param {THREE.Color}
- */
-function handleLightColor(color){
-	return function(value){
-    if(typeof value === 'string'){
-      value = value.replace('#', '0x');
-    }
-    color.setHex(value);
-	};
 }
