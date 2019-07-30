@@ -573,21 +573,3 @@ function handleObjectType(objType){
   camera.position.y = 15;
   camera.position.z = 15;
 }
-
-/**
- * Changes the opacity of a given grid.
- *
- * @param {number} - The new value of the opacity of the given grid.
- * @param {LabeledGrid}
- * @param {LabeledGrid}
- */
-function handleGridOpacity(value, grid){
-  if(value == 0.0){
-    grid.toggle(false);
-  }
-  else{
-    if(!grid.getToggle())
-      grid.toggle(true);
-    grid.setOpacity(value);
-  }
-}
