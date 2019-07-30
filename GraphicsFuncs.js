@@ -109,7 +109,8 @@ function readFileByType(){
             objMesh = prevObjMesh;
 
             var objName = object.name;
-            if(objName != 'cube1' && objName != 'teapot1' && objName != 'sphere1' && objName != 'cylinder1' && fileExt != 'stl'){
+            if(objName != 'cube1' && objName != 'teapot1' && objName != 'sphere1' &&
+               objName != 'cylinder1' && fileExt != 'stl'){
               scene.add(object);
             }
             else{
@@ -486,10 +487,17 @@ function handleObjectType(objType){
 
       object = new THREE.BoxGeometry(2, 2, 2);
       object.name = 'cube1';
-      var material = new THREE.MeshStandardMaterial();
+
+      var j = 0;
+      for(var i = 0; i < object.faces.length; i+=2){
+        object.faces[i].color.setHex(cube_colors[j]);
+        object.faces[i+1].color.setHex(cube_colors[j]);
+        j++
+      }
+
+      var material = new THREE.MeshStandardMaterial({ color: 0xffffff, vertexColors: THREE.FaceColors });
       objMesh = new THREE.Mesh(object, material);
-      objMesh.material.color.setHex(0x2194ce);
-      objMesh.name = 'cube1';
+      objMesh.name = 'cubemesh1';
       scene.add(objMesh);
 
       // ADJUST THE SCENE
@@ -505,29 +513,44 @@ function handleObjectType(objType){
 
       object = new THREE.TeapotBufferGeometry(1);
       object.name = 'teapot1';
-      var material = new THREE.MeshStandardMaterial();
+      var material = new THREE.MeshStandardMaterial({ vertexColors: THREE.FaceColors });
       objMesh = new THREE.Mesh(object, material);
-      objMesh.material.color.setHex(0x2194ce);
-      objMesh.name = 'teapot1';
+      objMesh.name = 'teapotmesh1';
       scene.add(objMesh);
 
       // ADJUST THE SCENE
       controls.reset();
-      objMesh.position.x = 2.5;
       objMesh.position.y = 1;
-      objMesh.position.z = 1.5;
       break;
 
     case 'Sphere':
       // delete displayed object
       removeObjByType();
 
-      object = new THREE.SphereGeometry(1, 32, 32);
+      object = new THREE.SphereGeometry(1, 64, 64);
       object.name = 'sphere1';
-      var material = new THREE.MeshStandardMaterial();
+
+      var col_ind = 0;
+      var wrap_around = false;
+      var beach_ball_cols = [0x000ff, 0xffffff, 0x00ff00];
+      for(var i = 0; i < object.faces.length; i+=16){
+        for(var j = 0; j < 16; j++){
+          object.faces[i+j].color.setHex(beach_ball_cols[2-col_ind]);
+        }
+        if(col_ind == 0)
+          wrap_around = true;
+        else if(col_ind == 2)
+          wrap_around = false;
+
+        if(wrap_around)
+          col_ind++;
+        else
+          col_ind--;
+      }
+
+      var material = new THREE.MeshStandardMaterial({ vertexColors: THREE.FaceColors });
       objMesh = new THREE.Mesh(object, material);
-      objMesh.material.color.setHex(0x2194ce);
-      objMesh.name = 'sphere1';
+      objMesh.name = 'spheremesh1';
       scene.add(objMesh);
 
       // ADJUST THE SCENE
@@ -543,10 +566,14 @@ function handleObjectType(objType){
 
       object = new THREE.CylinderGeometry(1, 1, 2, 48);
       object.name = 'cylinder1';
-      var material = new THREE.MeshStandardMaterial();
+
+      for(var i = 0; i < object.faces.length; i++){
+        object.faces[i].color.setHex(cube_colors[i % 6]);
+      }
+
+      var material = new THREE.MeshStandardMaterial({ vertexColors: THREE.FaceColors });
       objMesh = new THREE.Mesh(object, material);
-      objMesh.material.color.setHex(0x2194ce);
-      objMesh.name = 'cylinder1';
+      objMesh.name = 'cylindermesh1';
       scene.add(objMesh);
 
       // ADJUST THE SCENE
@@ -566,7 +593,7 @@ function handleObjectType(objType){
       break;
 
     default:
-      console.log("How'd you get here? HAX!");
+      console.log("??");
       break;
   }
   camera.position.x = 15;
