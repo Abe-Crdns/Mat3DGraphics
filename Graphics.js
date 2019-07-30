@@ -5,6 +5,7 @@
 
 // global program variables
 var renderer, scene, camera, controls, objMesh, object;
+var cube_colors = [0xffff00, 0x00ffff, 0xff00ff, 0x4f4f4f, 0x4b0082, 0xff8c00];
 var transformArr = [];
 
 /**
@@ -28,20 +29,21 @@ function init(){
   controls.dampingFactor = 0.25;
   controls.enableZoom = true;
 
+  // ambient light
+  var light = new THREE.AmbientLight( 0xffffff );
+  scene.add(light);
+
   // DEFAULT CUBE OBJECT
   object = new THREE.BoxGeometry(2, 2, 2);
-  var faces_cols = [0xffff00, 0x00ffff, 0xff00ff,
-                    0x4f4f4f, 0x4b0082, 0xff8c00];
-
   var j = 0;
   for(var i = 0; i < object.faces.length; i+=2){
-    object.faces[i].color.setHex(faces_cols[j]);
-    object.faces[i+1].color.setHex(faces_cols[j]);
+    object.faces[i].color.setHex(cube_colors[j]);
+    object.faces[i+1].color.setHex(cube_colors[j]);
     j++
   }
 
   object.name = 'cube1';
-  var material = new THREE.MeshBasicMaterial({ color: 0xffffff, vertexColors: THREE.FaceColors });
+  var material = new THREE.MeshBasicMaterial({ vertexColors: THREE.FaceColors });
   objMesh = new THREE.Mesh(object, material);
   objMesh.name = 'cube1';
   scene.add(objMesh);
