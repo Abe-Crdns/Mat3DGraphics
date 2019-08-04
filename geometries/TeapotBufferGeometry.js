@@ -391,7 +391,7 @@ THREE.TeapotBufferGeometry = function ( size, segments, bottom, lid, body, fitLi
 
 	THREE.BufferGeometry.call( this );
 
-	size = size || 50;
+	size = (size*1.0) || 50;
 
 	// number of segments per patch
 	segments = segments !== undefined ? Math.max( 2, Math.floor( segments ) || 10 ) : 10;
@@ -435,10 +435,10 @@ THREE.TeapotBufferGeometry = function ( size, segments, bottom, lid, body, fitLi
 
 	var vertices = new Float32Array( numVertices * 3 );
 	var normals = new Float32Array( numVertices * 3 );
-  	var colors = new Float32Array( numVertices * 3 );
+  var colors = new Float32Array( numVertices * 3 );
 	var uvs = new Float32Array( numVertices * 2 );
 
-  	var color = new THREE.Color();
+  var color = new THREE.Color();
 
 	// Bezier form
 	var ms = new THREE.Matrix4();
@@ -662,10 +662,10 @@ THREE.TeapotBufferGeometry = function ( size, segments, bottom, lid, body, fitLi
 					normals[ normCount ++ ] = normOut.y;
 					normals[ normCount ++ ] = normOut.z;
 
-				 	color.setHSL( (sstep*1.0) / segments, 1, 0.5 );
-				  	colors[vertCount - 3] = color.r;
-				  	colors[vertCount - 2] = color.g;
-				 	colors[vertCount - 1] = color.b;
+          color.setHSL( (sstep*1.0) / segments, 1, 0.5 );
+          colors[vertCount - 3] = color.r;
+          colors[vertCount - 2] = color.g;
+          colors[vertCount - 1] = color.b;
 
 					uvs[ uvCount ++ ] = 1 - t;
 					uvs[ uvCount ++ ] = 1 - s;
@@ -714,12 +714,11 @@ THREE.TeapotBufferGeometry = function ( size, segments, bottom, lid, body, fitLi
 	this.setIndex( new THREE.BufferAttribute( indices, 1 ) );
 	this.addAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
 	this.addAttribute( 'normal', new THREE.BufferAttribute( normals, 3 ) );
-  	this.addAttribute( 'color', new THREE.BufferAttribute( colors, 3 ) );
+  this.addAttribute( 'color', new THREE.BufferAttribute( colors, 3 ) );
 	this.addAttribute( 'uv', new THREE.BufferAttribute( uvs, 2 ) );
 
 	this.computeBoundingSphere();
-  	this.computeVertexNormals();
-  	this.computeFaceNormals();
+  this.computeBoundingBox();
 };
 
 
