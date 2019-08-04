@@ -17,7 +17,9 @@ const MAT3D_CUBE = function(){
     j++;
   }
 
-  var material = new THREE.MeshStandardMaterial({ vertexColors: THREE.FaceColors, opacity: 0.7, transparent: true });
+  var material = new THREE.MeshStandardMaterial({ vertexColors: THREE.FaceColors,
+                                                  opacity: 0.7,
+                                                  transparent: true });
   var cube_mesh = new THREE.Mesh(cube_geo, material);
   cube_mesh.name = "cube1mesh";
 
@@ -33,7 +35,9 @@ const MAT3D_TEAPOT = function(){
   var teapot_geo = new THREE.TeapotBufferGeometry(0.5);
   teapot_geo.name = "mat3dteapot";
 
-  var teapot_material = new THREE.MeshStandardMaterial({ vertexColors: THREE.FaceColors });
+  var teapot_material = new THREE.MeshStandardMaterial({ vertexColors: THREE.FaceColors,
+                                                         opacity: 0.7,
+                                                         transparent: true });
   var teapot_mesh = new THREE.Mesh(teapot_geo, teapot_material);
   teapot_mesh.name = "teapot1mesh";
 
@@ -68,7 +72,9 @@ const MAT3D_SPHERE = function(){
       col_ind--;
   }
 
-  var material = new THREE.MeshStandardMaterial({ vertexColors: THREE.FaceColors });
+  var material = new THREE.MeshStandardMaterial({ vertexColors: THREE.FaceColors,
+                                                  opacity: 0.7,
+                                                  transparent: true });
   var sphere_mesh = new THREE.Mesh(sphere_geo, material);
   sphere_mesh.name = "sphere1mesh";
 
@@ -90,7 +96,9 @@ const MAT3D_CYLINDER = function(){
     faces.color.setHex(cylinder_colors[i % 3]);
   });
 
-  var material = new THREE.MeshStandardMaterial({ vertexColors: THREE.FaceColors });
+  var material = new THREE.MeshStandardMaterial({ vertexColors: THREE.FaceColors,
+                                                  opacity: 0.7,
+                                                  transparent: true });
   var cylinder_mesh = new THREE.Mesh(cylinder_geo, material);
   cylinder_mesh.name = "cylinder1mesh";
 
