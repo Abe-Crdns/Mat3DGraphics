@@ -9,8 +9,8 @@ const MAT3D_CUBE = function(){
   cube_geo.computeBoundingBox();
 
   var j = 0;
-  var cube_colors = [0xffff00, 0x00ffff, 0xff00ff,
-                     0x4f4f4f, 0x4b0082, 0xff8c00];
+  var cube_colors = [ 0xffff00, 0x00ffff, 0xff00ff,
+                      0x00fe0e, 0xff8c00, 0x4c4c4c ];
   for(var i = 0; i < cube_geo.faces.length; i+=2){
     cube_geo.faces[i].color.setHex(cube_colors[j]);
     cube_geo.faces[i+1].color.setHex(cube_colors[j]);

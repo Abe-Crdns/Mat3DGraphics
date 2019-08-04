@@ -1,6 +1,6 @@
 /**
  * @author Abraham Cardenas https://github.com/Abe-Crdns
- * @version Mat3d graphics v1.0
+ * @version v2.0
  */
 
 import { CoordSys3D } from './coordinate_system/CoordSys3D.js'
@@ -58,36 +58,6 @@ function init(){
   _3D_GRID = new CoordSys3D();
   _3D_GRID.name = "My3DGrid";
   SCENE.add(_3D_GRID);
-
-  /*
-  var geometry = new THREE.SphereBufferGeometry( 0.025, 32, 32 );
-  var material = new THREE.MeshBasicMaterial( { color: 0xfcfcfc } );
-  sphereInter = new THREE.Mesh( geometry, material );
-  sphereInter.visible = false;
-  */
-
-  // Setup the line trackers
-  /*
-  var line_geometry = new LineGeometry();
-  line_geometry.setPositions([0, 0, 0,
-                              0, 3, 5]);
-  line_geometry.setColors([ 0, 0, 0,
-                            0, 0, 0 ]);
-  //geometry.addAttribute('position', new THREE.BufferAttribute(new Float32Array(3 * 6), 3));
-  var line_material = new LineMaterial( {
-    color: 0xffffff,
-    linewidth: 5,
-    vertexColors: THREE.VertexColors,
-    dashed: false
-  } );
-  LINE_TRACKERS = new Line2( line_geometry, line_material );
-  LINE_TRACKERS.computeLineDistances();
-  LINE_TRACKERS.scale.set( 1, 1, 1 );
-LINE_TRACKERS
-  SCENE.add( LINE_TRACKERS );
-
-  console.log(LINE_TRACKERS);
-  */
 
   // SETUP GUI
   var gui = new dat.GUI();
@@ -157,20 +127,20 @@ function updateRayCaster(){
 
   var intersects = RAYCASTER.intersectObjects(INTERSECT_OBJS, true);
 
-  if (intersects.length > 0) {
-  	var intersect_pt = intersects[ 0 ].point;
+  if(intersects.length > 0){
+    var intersect_pt = intersects[ 0 ].point;
 
-  	var xRayLineGeo = _3D_GRID.xRayLine.geometry;
+    var xRayLineGeo = _3D_GRID.xRayLine.geometry;
     var yRayLineGeo = _3D_GRID.yRayLine.geometry;
     var zRayLineGeo = _3D_GRID.zRayLine.geometry;
 
     xRayLineGeo.setPositions([  0, intersect_pt.y, intersect_pt.z,
-                              intersect_pt.x, intersect_pt.y, intersect_pt.z  ]);
+                                intersect_pt.x, intersect_pt.y, intersect_pt.z  ]);
     yRayLineGeo.setPositions([  intersect_pt.x, 0, intersect_pt.z,
-                              intersect_pt.x, intersect_pt.y, intersect_pt.z  ]);
+                                intersect_pt.x, intersect_pt.y, intersect_pt.z  ]);
     zRayLineGeo.setPositions([  intersect_pt.x, intersect_pt.y, 0,
-                              intersect_pt.x, intersect_pt.y, intersect_pt.z  ]);
-                              
+                                intersect_pt.x, intersect_pt.y, intersect_pt.z  ]);
+
     _3D_GRID.xRayLine.computeLineDistances();
     _3D_GRID.yRayLine.computeLineDistances();
     _3D_GRID.zRayLine.computeLineDistances();
@@ -473,21 +443,20 @@ function loadGuiTransfms(gui){
 * Resets all the transformations that were applied to the current GEOMETRY being displayed.
 */
 function resetTransfms(){
- var resMat = new THREE.Matrix4().identity();
- for(var i = 0; i < TRANSFM_ARR.length; i++){
-   var temp = new THREE.Matrix4();
-   var invMat = temp.getInverse(TRANSFM_ARR[i]);
-   resMat.multiply(invMat);
- }
- MESH.geometry.applyMatrix(resMat);
- MESH.geometry.verticesNeedUpdate = true;
- CONTROLS.reset();
- CAMERA.position.x = 15;
- CAMERA.position.y = 15;
- CAMERA.position.z = 15;
+  var resMat = new THREE.Matrix4().identity();
+  for(var i = 0; i < TRANSFM_ARR.length; i++){
+    var temp = new THREE.Matrix4();
+    var invMat = temp.getInverse(TRANSFM_ARR[i]);
+    resMat.multiply(invMat);
+  }
+  MESH.geometry.applyMatrix(resMat);
+  MESH.geometry.verticesNeedUpdate = true;
+  CONTROLS.reset();
+  CAMERA.position.x = 5;
+  CAMERA.position.y = 5;
+  CAMERA.position.z = 5;
 
- TRANSFM_ARR = [];
- console.clear();
+  TRANSFM_ARR = [];
 }
 
 /**
@@ -679,6 +648,8 @@ function handleObjectType(objType){
 
     default: break;
   }
+
+  // check object dimensions and readjust scene
   CAMERA.position.x = 5;
   CAMERA.position.y = 5;
   CAMERA.position.z = 5;

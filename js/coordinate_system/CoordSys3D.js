@@ -10,7 +10,6 @@ import { LineGeometry } from '../geometries/lines/LineGeometry.js';
 import { _createClass, _classCallCheck,
         _possibleConstructorReturn, _inherits } from '../lib/__class.js';
 
-
 var CoordSys3D = function(_THREE$Object3D){
   _inherits(CoordSys3D, _THREE$Object3D);
 
