@@ -134,11 +134,11 @@ function updateRayCaster(){
     var yRayLineGeo = _3D_GRID.yRayLine.geometry;
     var zRayLineGeo = _3D_GRID.zRayLine.geometry;
 
-    xRayLineGeo.setPositions([  0, intersect_pt.y, intersect_pt.z,
+    xRayLineGeo.setPositions([  _3D_GRID.origin.x, intersect_pt.y, intersect_pt.z,
                                 intersect_pt.x, intersect_pt.y, intersect_pt.z  ]);
-    yRayLineGeo.setPositions([  intersect_pt.x, 0, intersect_pt.z,
+    yRayLineGeo.setPositions([  intersect_pt.x,  _3D_GRID.origin.y, intersect_pt.z,
                                 intersect_pt.x, intersect_pt.y, intersect_pt.z  ]);
-    zRayLineGeo.setPositions([  intersect_pt.x, intersect_pt.y, 0,
+    zRayLineGeo.setPositions([  intersect_pt.x, intersect_pt.y, _3D_GRID.origin.z,
                                 intersect_pt.x, intersect_pt.y, intersect_pt.z  ]);
 
     _3D_GRID.xRayLine.computeLineDistances();
@@ -649,7 +649,7 @@ function handleObjectType(objType){
     default: break;
   }
 
-  // check object dimensions and readjust scene
+  // check object dimensions and readjust coordinate system
   CAMERA.position.x = 5;
   CAMERA.position.y = 5;
   CAMERA.position.z = 5;

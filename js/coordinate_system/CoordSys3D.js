@@ -22,6 +22,9 @@ var CoordSys3D = function(_THREE$Object3D){
     var xyLength = (args !== undefined && args.xyLength !== undefined) ? args.xyLength : 5;
     var yzLength = (args !== undefined && args.yzLength !== undefined) ? args.yzLength : 5;
 
+    var origin = (args !== undefined && args.origin !== undefined && args.origin.x !== undefined &&
+      args.origin.y !== undefined && args.origin.z !== undefined) ? args.origin : {x: 0, y: 0, z: 0};
+
     var xzColor = (args !== undefined && args.xzColor !== undefined) ? args.xzColor : 0x0000ff;
     var xyColor = (args !== undefined && args.xyColor !== undefined) ? args.xyColor : 0x00ff00;
     var yzColor = (args !== undefined && args.yzColor !== undefined) ? args.yzColor : 0xff0000;
@@ -39,6 +42,8 @@ var CoordSys3D = function(_THREE$Object3D){
     var zAxisOpacity = (args !== undefined && args.zAxisOpacity !== undefined) ? args.zAxisOpacity : 1;
 
     var step = (args !== undefined && args.step !== undefined) ? args.step : 5;
+    var stepSubDivisions = (args !== undefined && args.stepSubDivisions !== undefined) ? args.stepSubDivisions : 5;
+
     var text = (args !== undefined && args.text !== undefined) ? args.text : true;
     var textColor = (args !== undefined && args.textColor !== undefined) ? args.textColor : "#000000";
 
@@ -51,6 +56,7 @@ var CoordSys3D = function(_THREE$Object3D){
 
     var _this = _possibleConstructorReturn(this, (CoordSys3D.__proto__ ||
                                                   Object.getPrototypeOf(CoordSys3D)).call(this));
+
     _this.xzWidth = xzWidth;
     _this.xyWidth = xyWidth;
     _this.yzWidth = yzWidth;
@@ -58,6 +64,8 @@ var CoordSys3D = function(_THREE$Object3D){
     _this.xzLength = xzLength;
     _this.xyLength = xyLength;
     _this.yzLength = yzLength;
+
+    _this.origin = origin;
 
     _this.xzColor = xzColor;
     _this.xyColor = xyColor;
@@ -76,122 +84,17 @@ var CoordSys3D = function(_THREE$Object3D){
     _this.zAxisOpacity = zAxisOpacity;
 
     _this.step = step;
+    _this.stepSubDivisions = stepSubDivisions;
+
     _this.text = text;
     _this.textColor = textColor;
 
-    _this.name = "grid";
+    _this.name = "";
 
-    //TODO: clean this up
-    _this.marginSize = 5;
-    _this.stepSubDivisions = step;
 
-    _this._draw3DGrid({drawXZ: drawXZ, drawXY: drawXY, drawYZ: drawYZ});
+    _this._draw3DCoordSys({drawXZ: drawXZ, drawXY: drawXY, drawYZ: drawYZ});
 
     return _this;
-  }
-
-  function computePlaneVertices(args){
-
-    var computeXZ = (args !== undefined && args.computeXZ !== undefined) ? args.computeXZ : false;
-    var computeXY = (args !== undefined && args.computeXY !== undefined) ? args.computeXY : false;
-    var computeYZ = (args !== undefined && args.computeYZ !== undefined) ? args.computeYZ : false;
-    var width = (args !== undefined && args.width !== undefined) ? args.width : 5;
-    var length = (args !== undefined && args.length !== undefined) ? args.length : 5;
-    var step = (args !== undefined && args.step !== undefined) ? args.step : 5;
-    var stepSubDivisions = (args !== undefined && args.stepSubDivisions !== undefined) ? args.stepSubDivisions : 5;
-
-    if((computeXZ || computeXY || computeYZ) &&  width && length){
-      var xzGridGeometry, xzSubGridGeometry, xyGridGeometry,
-          xySubGridGeometry, yzGridGeometry, yzSubGridGeometry;
-
-      if(computeXZ){
-        xzGridGeometry = new THREE.Geometry();
-        xzSubGridGeometry = new THREE.Geometry();
-      }
-
-      if(computeXY){
-        xyGridGeometry = new THREE.Geometry();
-        xySubGridGeometry = new THREE.Geometry();
-      }
-
-      if(computeYZ){
-        yzGridGeometry = new THREE.Geometry();
-        yzSubGridGeometry = new THREE.Geometry();
-      }
-
-      for(var i = -width; i < 0; i += step / stepSubDivisions){
-        if(computeXZ){
-          xzSubGridGeometry.vertices.push(new THREE.Vector3(0, i, 0));
-          xzSubGridGeometry.vertices.push(new THREE.Vector3(length, i, 0));
-        }
-
-        if(computeXY){
-          xySubGridGeometry.vertices.push(new THREE.Vector3(0, -i, 0));
-          xySubGridGeometry.vertices.push(new THREE.Vector3(length, -i, 0));
-        }
-
-        if(computeYZ){
-          yzSubGridGeometry.vertices.push(new THREE.Vector3(0, -i, 0));
-          yzSubGridGeometry.vertices.push(new THREE.Vector3(length, -i, 0));
-        }
-
-        if (i % step == 0) {
-          if(computeXZ){
-            xzGridGeometry.vertices.push(new THREE.Vector3(0, i, 0));
-            xzGridGeometry.vertices.push(new THREE.Vector3(length, i, 0));
-          }
-
-          if(computeXY){
-            xyGridGeometry.vertices.push(new THREE.Vector3(0, -i, 0));
-            xyGridGeometry.vertices.push(new THREE.Vector3(length, -i, 0));
-          }
-
-          if(computeYZ){
-            yzGridGeometry.vertices.push(new THREE.Vector3(0, -i, 0));
-            yzGridGeometry.vertices.push(new THREE.Vector3(length, -i, 0));
-          }
-        }
-      }
-
-      for (var i = step / stepSubDivisions; i <= length; i += step / stepSubDivisions) {
-        if(computeXZ){
-          xzSubGridGeometry.vertices.push(new THREE.Vector3(i, -width, 0));
-          xzSubGridGeometry.vertices.push(new THREE.Vector3(i, 0, 0));
-        }
-
-        if(computeXY){
-          xySubGridGeometry.vertices.push(new THREE.Vector3(i, width, 0));
-          xySubGridGeometry.vertices.push(new THREE.Vector3(i, 0, 0));
-        }
-
-        if(computeYZ){
-          yzSubGridGeometry.vertices.push(new THREE.Vector3(i, width, 0));
-          yzSubGridGeometry.vertices.push(new THREE.Vector3(i, 0, 0));
-        }
-
-        if (i % step == 0) {
-          if(computeXZ){
-            xzGridGeometry.vertices.push(new THREE.Vector3(i, -width, 0));
-            xzGridGeometry.vertices.push(new THREE.Vector3(i, 0, 0));
-          }
-
-          if(computeXY){
-            xyGridGeometry.vertices.push(new THREE.Vector3(i, width, 0));
-            xyGridGeometry.vertices.push(new THREE.Vector3(i, 0, 0));
-          }
-
-          if(computeYZ){
-            yzGridGeometry.vertices.push(new THREE.Vector3(i, width, 0));
-            yzGridGeometry.vertices.push(new THREE.Vector3(i, 0, 0));
-          }
-        }
-      }
-
-
-      return {  xzSubGridGeometry: xzSubGridGeometry, xySubGridGeometry: xySubGridGeometry,
-                yzSubGridGeometry: yzSubGridGeometry, xzGridGeometry: xzGridGeometry,
-                xyGridGeometry: xyGridGeometry, yzGridGeometry: yzGridGeometry  };
-    }
   }
 
   function hexToRgb(hex) {
@@ -204,37 +107,28 @@ var CoordSys3D = function(_THREE$Object3D){
   }
 
   _createClass(CoordSys3D, [{
-    key: "_draw3DGrid",
-    value: function _draw3DGrid(args){
+    key: "_draw3DCoordSys",
+    value: function _draw3DCoordSys(args){
       var drawXZ = (args !== undefined && args.drawXZ !== undefined) ? args.drawXZ : false;
       var drawXY = (args !== undefined && args.drawXY !== undefined) ? args.drawXY : false;
       var drawYZ = (args !== undefined && args.drawYZ !== undefined) ? args.drawYZ : false;
 
       if(!drawXZ && !drawXY && !drawYZ){
-        console.log("_draw3DGrid: Nothing to draw");
+        console.log("_draw3DCoordSys: Nothing to draw");
         return;
       }
 
-      var xzGridGeometry, xzGridMaterial, xzMainGridZ, xzPlaneFragmentShader,
-        xzPlaneGeometry, xzPlaneMaterial, xzSubGridGeometry, xzSubGridMaterial, xzSubGridZ;
-      var xyGridGeometry, xyGridMaterial, xyMainGridZ, xyPlaneFragmentShader,
-        xyPlaneGeometry, xyPlaneMaterial, xySubGridGeometry, xySubGridMaterial, xySubGridZ;
-      var yzGridGeometry, yzGridMaterial, yzMainGridZ, yzPlaneFragmentShader,
-        yzPlaneGeometry, yzPlaneMaterial, yzSubGridGeometry, yzSubGridMaterial, yzSubGridZ;
-
-
       if(drawXZ){
-        xzGridGeometry = new THREE.Geometry();
-        xzGridMaterial = new THREE.LineBasicMaterial({
+        this.xzGridGeometry = new THREE.Geometry();
+        this.xzGridMaterial = new THREE.LineBasicMaterial({
           color: new THREE.Color().setHex(this.xzColor),
           opacity: this.xzOpacity,
           linewidth: 2,
           transparent: true
         });
 
-        xzSubGridZ = 0;
-        xzSubGridGeometry = new THREE.Geometry();
-        xzSubGridMaterial = new THREE.LineBasicMaterial({
+        this.xzSubGridGeometry = new THREE.Geometry();
+        this.xzSubGridMaterial = new THREE.LineBasicMaterial({
           color: new THREE.Color().setHex(this.xzColor),
           opacity: this.xzOpacity / 2,
           transparent: true
@@ -242,16 +136,16 @@ var CoordSys3D = function(_THREE$Object3D){
       }
 
       if(drawXY){
-        xyGridGeometry = new THREE.Geometry();
-        xyGridMaterial = new THREE.LineBasicMaterial({
+        this.xyGridGeometry = new THREE.Geometry();
+        this.xyGridMaterial = new THREE.LineBasicMaterial({
           color: new THREE.Color().setHex(this.xyColor),
           opacity: this.xyOpacity,
           linewidth: 2,
           transparent: true
         });
 
-        xySubGridGeometry = new THREE.Geometry();
-        xySubGridMaterial = new THREE.LineBasicMaterial({
+        this.xySubGridGeometry = new THREE.Geometry();
+        this.xySubGridMaterial = new THREE.LineBasicMaterial({
           color: new THREE.Color().setHex(this.xyColor),
           opacity: this.xyOpacity / 2,
           transparent: true
@@ -259,122 +153,55 @@ var CoordSys3D = function(_THREE$Object3D){
       }
 
       if(drawYZ){
-        yzGridGeometry = new THREE.Geometry();
-        yzGridMaterial = new THREE.LineBasicMaterial({
+        this.yzGridGeometry = new THREE.Geometry();
+        this.yzGridMaterial = new THREE.LineBasicMaterial({
           color: new THREE.Color().setHex(this.yzColor),
           opacity: this.yzOpacity,
           linewidth: 2,
           transparent: true
         });
 
-        yzSubGridGeometry = new THREE.Geometry();
-        yzSubGridMaterial = new THREE.LineBasicMaterial({
+        this.yzSubGridGeometry = new THREE.Geometry();
+        this.yzSubGridMaterial = new THREE.LineBasicMaterial({
           color: new THREE.Color().setHex(this.yzColor),
           opacity: this.yzOpacity / 2,
           transparent: true
         });
       }
 
-      var xzWidth = this.xzWidth;
-      var xzLength = this.xzLength;
-      var xyWidth = this.xyWidth;
-      var xyLength = this.xyLength;
-      var yzWidth = this.yzWidth;
-      var yzLength = this.yzLength;
-      var step = this.step;
-      var stepSubDivisions = this.stepSubDivisions;
-
-      if(xzWidth == xyWidth && xzWidth == yzWidth && xyWidth == yzWidth &&
-         xzLength == xyLength && xzLength == yzLength && xyLength == yzLength){
-        var computedAllVert = computePlaneVertices( {  computeXZ: true, computeXY: true, computeYZ: true,
-                                                      width: xzWidth, length: xzLength, step: step,
-                                                      stepSubDivisions: stepSubDivisions } );
-
-        xzGridGeometry = computedAllVert.xzGridGeometry;
-        xyGridGeometry = computedAllVert.xyGridGeometry;
-        yzGridGeometry = computedAllVert.yzGridGeometry
-        xzSubGridGeometry = computedAllVert.xzSubGridGeometry;
-        xySubGridGeometry = computedAllVert.xySubGridGeometry;
-        yzSubGridGeometry = computedAllVert.yzSubGridGeometry;
+      if(this.xzWidth == this.xyWidth && this.xzWidth == this.yzWidth && this.xyWidth == this.yzWidth &&
+         this.xzLength == this.xyLength && this.xzLength == this.yzLength && this.xyLength == this.yzLength){
+        this.computeGridVertices({ computeXZ: true, computeXY: true, computeYZ: true,
+                                   width: this.xzWidth, length: this.xzLength });
       }
-      else if(xzWidth == xyWidth && xzLength == xyLength){
-        var computedXZXY_Vert = computePlaneVertices({ computeXZ: true, computeXY: true,
-                                                      width: xzWidth, length: xzLength, step: step,
-                                                      stepSubDivisions: stepSubDivisions });
-
-        var computedYZ_Vert = computePlaneVertices({   computeYZ: true,
-                                                      width: yzWidth, length: yzLength, step: step,
-                                                      stepSubDivisions: stepSubDivisions });
-
-        xzGridGeometry = computedXZXY_Vert.xzGridGeometry;
-        xyGridGeometry = computedXZXY_Vert.xyGridGeometry;
-        yzGridGeometry = computedYZ_Vert.yzGridGeometry
-        xzSubGridGeometry = computedXZXY_Vert.xzSubGridGeometry;
-        xySubGridGeometry = computedXZXY_Vert.xySubGridGeometry;
-        yzSubGridGeometry = computedYZ_Vert.yzSubGridGeometry;
+      else if(this.xzWidth == this.xyWidth && this.xzLength == this.xyLength){
+        this.computeGridVertices({ computeXZ: true, computeXY: true,
+                                   width: this.xzWidth, length: this.xzLength });
+        this.computeGridVertices({ computeYZ: true, width: this.yzWidth, length: this.yzLength });
       }
-      else if(xzWidth == yzWidth && xzLength == yzLength){
-        var computedXZYZ_Vert = computePlaneVertices({ computeXZ: true, computeYZ: true,
-                                                      width: xzWidth, length: xzLength, step: step,
-                                                      stepSubDivisions: stepSubDivisions  });
-
-        var computedXY_Vert = computePlaneVertices({  computeXY: true,
-                                                     width: xyWidth, length: xyLength, step: step,
-                                                     stepSubDivisions: stepSubDivisions  });
-
-        xzGridGeometry = computedXZYZ_Vert.xzGridGeometry;
-        xyGridGeometry = computedXY_Vert.xyGridGeometry;
-        yzGridGeometry = computedXZYZ_Vert.yzGridGeometry
-        xzSubGridGeometry = computedXZYZ_Vert.xzSubGridGeometry;
-        xySubGridGeometry = computedXY_Vert.xySubGridGeometry;
-        yzSubGridGeometry = computedXZYZ_Vert.yzSubGridGeometry;
+      else if(this.xzWidth == this.yzWidth && this.xzLength == this.yzLength){
+        this.computeGridVertices({ computeXZ: true, computeYZ: true,
+                                   width: this.xzWidth, length: this.xzLength });
+        this.computeGridVertices({ computeXY: true, width: this.xyWidth, length: this.xyLength });
       }
-      else if(xyWidth == yzWidth && xyLength == yzLength){
-        var computedXYYZ_Vert = computePlaneVertices({ computeXY: true, computeYZ: true,
-                                                      width: xyWidth, length: xyLength, step: step,
-                                                      stepSubDivisions: stepSubDivisions  });
-
-        var computedXZ_Vert = computePlaneVertices({  computeXZ: true,
-                                                     width: xyWidth, length: xyLength, step: step,
-                                                     stepSubDivisions: stepSubDivisions  });
-
-        xzGridGeometry = computedXZ_Vert.xzGridGeometry;
-        xyGridGeometry = computedXYYZ_Vert.xyGridGeometry;
-        yzGridGeometry = computedXYYZ_Vert.yzGridGeometry
-        xzSubGridGeometry = computedXZ_Vert.xzSubGridGeometry;
-        xySubGridGeometry = computedXYYZ_Vert.xySubGridGeometry;
-        yzSubGridGeometry = computedXYYZ_Vert.yzSubGridGeometry;
+      else if(this.xyWidth == this.yzWidth && this.xyLength == this.yzLength){
+        this.computeGridVertices({ computeXY: true, computeYZ: true,
+                                   width: this.xyWidth, length: this.xyLength });
+        this.computeGridVertices({ computeXZ: true, width: this.xyWidth, length: this.xyLength });
       }
       else{
-        var computedXZ_Vert = computePlaneVertices({ computeXZ: true, width: xzWidth, length: xzLength,
-                                                    step: step, stepSubDivisions: stepSubDivisions  });
-        var computedXY_Vert = computePlaneVertices({ computeXY: true, width: xyWidth, length: xyLength,
-                                                    step: step, stepSubDivisions: stepSubDivisions  });
-        var computedYZ_Vert = computePlaneVertices({ computeYZ: true, width: yzWidth, length: yzLength,
-                                                    step: step, stepSubDivisions: stepSubDivisions  });
-
-        xzGridGeometry = computedXZ_Vert.xzGridGeometry;
-        xyGridGeometry = computedXYYZ_Vert.xyGridGeometry;
-        yzGridGeometry = computedXYYZ_Vert.yzGridGeometry
-        xzSubGridGeometry = computedXZ_Vert.xzSubGridGeometry;
-        xySubGridGeometry = computedXYYZ_Vert.xySubGridGeometry;
-        yzSubGridGeometry = computedXYYZ_Vert.yzSubGridGeometry;
+        this.computeGridVertices({ computeXZ: true, width: this.xzWidth, length: this.xzLength });
+        this.computeGridVertices({ computeXY: true, width: this.xyWidth, length: this.xyLength });
+        this.computeGridVertices({ computeYZ: true, width: this.yzWidth, length: this.yzLength });
       }
-
-      var xzOffsetWidth = xzWidth + this.marginSize;
-      var xzOffsetLength = xzLength + this.marginSize;
-      var xyOffsetWidth = xyWidth + this.marginSize;
-      var xyOffsetLength = xyLength + this.marginSize;
-      var yzOffsetWidth = yzWidth + this.marginSize;
-      var yzOffsetLength = yzLength + this.marginSize;
 
       var xzUpVector = new THREE.Vector3().fromArray([0, 1, 0]);
       var xyUpVector = new THREE.Vector3().fromArray([0, 0, 1]);
       var yzUpVector = new THREE.Vector3().fromArray([-1, 0, 0]);
 
       if(drawXZ){
-        this.xzMainGrid = new THREE.LineSegments(xzGridGeometry, xzGridMaterial);
-        this.xzSubGrid = new THREE.LineSegments(xzSubGridGeometry, xzSubGridMaterial);
+        this.xzMainGrid = new THREE.LineSegments(this.xzGridGeometry, this.xzGridMaterial);
+        this.xzSubGrid = new THREE.LineSegments(this.xzSubGridGeometry, this.xzSubGridMaterial);
 
         this.xzMainGrid.lookAt(xzUpVector);
         this.xzSubGrid.lookAt(xzUpVector);
@@ -384,8 +211,8 @@ var CoordSys3D = function(_THREE$Object3D){
       }
 
       if(drawXY){
-        this.xyMainGrid = new THREE.LineSegments(xyGridGeometry, xyGridMaterial);
-        this.xySubGrid = new THREE.LineSegments(xySubGridGeometry, xySubGridMaterial);
+        this.xyMainGrid = new THREE.LineSegments(this.xyGridGeometry, this.xyGridMaterial);
+        this.xySubGrid = new THREE.LineSegments(this.xySubGridGeometry, this.xySubGridMaterial);
 
         this.xyMainGrid.lookAt(xyUpVector);
         this.xySubGrid.lookAt(xyUpVector);
@@ -395,8 +222,8 @@ var CoordSys3D = function(_THREE$Object3D){
       }
 
       if(drawYZ){
-        this.yzMainGrid = new THREE.LineSegments(yzGridGeometry, yzGridMaterial);
-        this.yzSubGrid = new THREE.LineSegments(yzSubGridGeometry, yzSubGridMaterial);
+        this.yzMainGrid = new THREE.LineSegments(this.yzGridGeometry, this.yzGridMaterial);
+        this.yzSubGrid = new THREE.LineSegments(this.yzSubGridGeometry, this.yzSubGridMaterial);
 
         this.yzMainGrid.lookAt(yzUpVector);
         this.yzSubGrid.lookAt(yzUpVector);
@@ -406,37 +233,41 @@ var CoordSys3D = function(_THREE$Object3D){
       }
 
       var xAxisGeometry = new LineGeometry();
-      xAxisGeometry.setPositions( [0, 0, 0,   xyLength, 0, 0] );
-      var xAxisColor = hexToRgb(this.xAxisColor);
-      xAxisGeometry.setColors([ xAxisColor.r, xAxisColor.g, xAxisColor.b,
-                                xAxisColor.r, xAxisColor.g, xAxisColor.b ]);
-
       var yAxisGeometry = new LineGeometry();
-      yAxisGeometry.setPositions( [0, 0, 0,   0, xyLength, 0] );
-      var yAxisColor = hexToRgb(this.yAxisColor);
-      yAxisGeometry.setColors([ yAxisColor.r, yAxisColor.g, yAxisColor.b,
-                                yAxisColor.r, yAxisColor.g, yAxisColor.b ]);
-
       var zAxisGeometry = new LineGeometry();
-      zAxisGeometry.setPositions( [0, 0, 0,   0, 0, yzLength] );
-      var zAxisColor = hexToRgb(this.zAxisColor);
-      zAxisGeometry.setColors([ zAxisColor.r, zAxisColor.g, zAxisColor.b,
-                                zAxisColor.r, zAxisColor.g, zAxisColor.b ]);
-
       var xRayLineGeometry = new LineGeometry();
-      xRayLineGeometry.setPositions([0, 0, 0,   0, 0, 0]);
-      xRayLineGeometry.setColors([xAxisColor.r, xAxisColor.g, xAxisColor.b,
-                                  xAxisColor.r, xAxisColor.g, xAxisColor.b]);
-
       var yRayLineGeometry = new LineGeometry();
-      yRayLineGeometry.setPositions( [0, 0, 0,   0, 0, 0] );
-      yRayLineGeometry.setColors([yAxisColor.r, yAxisColor.g, yAxisColor.b,
-                                  yAxisColor.r, yAxisColor.g, yAxisColor.b]);
-
       var zRayLineGeometry = new LineGeometry();
-      zRayLineGeometry.setPositions( [0, 0, 0,   0, 0, 0] );
-      zRayLineGeometry.setColors([zAxisColor.r, zAxisColor.g, zAxisColor.b,
-                                  zAxisColor.r, zAxisColor.g, zAxisColor.b]);
+      var initRayLinesPos = [ this.origin.x, this.origin.y, this.origin.z,
+                              this.origin.x, this.origin.y, this.origin.z ];
+
+      xAxisGeometry.setPositions([ this.origin.x, this.origin.y, this.origin.z,
+                                   this.xyLength, this.origin.y, this.origin.z ]);
+      yAxisGeometry.setPositions([ this.origin.x, this.origin.y, this.origin.z,
+                                   this.origin.x, this.xyLength, this.origin.z ]);
+      zAxisGeometry.setPositions([ this.origin.x, this.origin.y, this.origin.z,
+                                   this.origin.x, this.origin.y, this.yzLength ]);
+      xRayLineGeometry.setPositions(initRayLinesPos);
+      yRayLineGeometry.setPositions(initRayLinesPos);
+      zRayLineGeometry.setPositions(initRayLinesPos);
+
+      var xAxisColor = hexToRgb(this.xAxisColor);
+      var yAxisColor = hexToRgb(this.yAxisColor);
+      var zAxisColor = hexToRgb(this.zAxisColor);
+
+      var xDirColors = [ xAxisColor.r, xAxisColor.g, xAxisColor.b,
+                         xAxisColor.r, xAxisColor.g, xAxisColor.b ];
+      var yDirColors = [ yAxisColor.r, yAxisColor.g, yAxisColor.b,
+                         yAxisColor.r, yAxisColor.g, yAxisColor.b ];
+      var zDirColors = [ zAxisColor.r, zAxisColor.g, zAxisColor.b,
+                         zAxisColor.r, zAxisColor.g, zAxisColor.b ];
+
+      xAxisGeometry.setColors(xDirColors);
+      xRayLineGeometry.setColors(xDirColors);
+      yAxisGeometry.setColors(yDirColors);
+      yRayLineGeometry.setColors(yDirColors);
+      zAxisGeometry.setColors(zDirColors);
+      zRayLineGeometry.setColors(zDirColors);
 
       var axisThickLineMaterial = new LineMaterial({
         color: 0xffffff,
@@ -490,77 +321,207 @@ var CoordSys3D = function(_THREE$Object3D){
       this.add(this.xRayLine);
       this.add(this.yRayLine);
       this.add(this.zRayLine);
-      //this._drawNumbering();
     }
   }, {
-    key: "setOpacityXZ",
-    value: function setOpacity(opacity) {
-      this.xzOpacity = opacity;
-      this.xzMainGrid.material.opacity = opacity;
-      this.xzSubGrid.material.opacity = opacity / 2;
-      this.xzMargin.material.opacity = opacity * 2;
-    }
-  }, {
-    key: "setOpacityXY",
-    value: function setOpacity(opacity) {
-      this.xyOpacity = opacity;
-      this.xyMainGrid.material.opacity = opacity;
-      this.xySubGrid.material.opacity = opacity / 2;
-      this.xyMargin.material.opacity = opacity * 2;
-    }
-  }, {
-    key: "setOpacityYZ",
-    value: function setOpacity(opacity) {
-      this.yzOpacity = opacity;
-      this.yzMainGrid.material.opacity = opacity;
-      this.yzSubGrid.material.opacity = opacity / 2;
-      this.yzMargin.material.opacity = opacity * 2;
-    }
-  }, {
-    key: "setColorXZ",
-    value: function setColor(color) {
-      this.xzColor = color;
-      this.xzMainGrid.material.color = new THREE.Color().setHex(this.xzColor);
-      this.xzSubGrid.material.color = new THREE.Color().setHex(this.xzColor);
-      this.xzMargin.material.color = new THREE.Color().setHex(this.xzColor);
-    }
-  }, {
-    key: "setColorXY",
-    value: function setColor(color) {
-      this.xyColor = color;
-      this.xyMainGrid.material.color = new THREE.Color().setHex(this.xyColor);
-      this.xySubGrid.material.color = new THREE.Color().setHex(this.xyColor);
-      this.xyMargin.material.color = new THREE.Color().setHex(this.xyColor);
-    }
-  }, {
-    key: "setColorYZ",
-    value: function setColor(color) {
-      this.yzColor = color;
-      this.yzMainGrid.material.color = new THREE.Color().setHex(this.yzColor);
-      this.yzSubGrid.material.color = new THREE.Color().setHex(this.yzColor);
-      this.yzMargin.material.color = new THREE.Color().setHex(this.yzColor);
-    }
-  }, {
-    key: "toggleText",
-    value: function toggleText(toggle) {
-      this.text = toggle;
-      var labels = this.labels.children;
-      for (var i = 0; i < this.labels.children.length; i++) {
-        var label = labels[i];
-        label.visible = toggle;
+    key: "computeGridVertices",
+    value: function computeGridVertices(args) {
+      var computeXZ = (args !== undefined && args.computeXZ !== undefined) ? args.computeXZ : false;
+      var computeXY = (args !== undefined && args.computeXY !== undefined) ? args.computeXY : false;
+      var computeYZ = (args !== undefined && args.computeYZ !== undefined) ? args.computeYZ : false;
+      var width = (args !== undefined && args.width !== undefined) ? args.width : 5;
+      var length = (args !== undefined && args.length !== undefined) ? args.length : 5;
+
+      var step = this.step;
+      var stepSubDivisions = this.stepSubDivisions;
+
+      if(computeXZ || computeXY || computeYZ){
+
+        for(var i = -width; i < 0; i += step / stepSubDivisions){
+          if(computeXZ){
+            this.xzSubGridGeometry.vertices.push(new THREE.Vector3(this.origin.x, i, this.origin.z));
+            this.xzSubGridGeometry.vertices.push(new THREE.Vector3(length, i, this.origin.z));
+          }
+
+          if(computeXY){
+            this.xySubGridGeometry.vertices.push(new THREE.Vector3(this.origin.x, -i, this.origin.z));
+            this.xySubGridGeometry.vertices.push(new THREE.Vector3(length, -i, this.origin.z));
+          }
+
+          if(computeYZ){
+            this.yzSubGridGeometry.vertices.push(new THREE.Vector3(this.origin.x, -i, this.origin.z));
+            this.yzSubGridGeometry.vertices.push(new THREE.Vector3(length, -i, this.origin.z));
+          }
+
+          if (i % step == 0) {
+            if(computeXZ){
+              this.xzGridGeometry.vertices.push(new THREE.Vector3(this.origin.x, i, this.origin.z));
+              this.xzGridGeometry.vertices.push(new THREE.Vector3(length, i, this.origin.z));
+            }
+
+            if(computeXY){
+              this.xyGridGeometry.vertices.push(new THREE.Vector3(this.origin.x, -i, this.origin.z));
+              this.xyGridGeometry.vertices.push(new THREE.Vector3(length, -i, this.origin.z));
+            }
+
+            if(computeYZ){
+              this.yzGridGeometry.vertices.push(new THREE.Vector3(this.origin.x, -i, this.origin.z));
+              this.yzGridGeometry.vertices.push(new THREE.Vector3(length, -i, this.origin.z));
+            }
+          }
+        }
+
+        for (var i = step / stepSubDivisions; i <= length; i += step / stepSubDivisions) {
+          if(computeXZ){
+            this.xzSubGridGeometry.vertices.push(new THREE.Vector3(i, -width, this.origin.z));
+            this.xzSubGridGeometry.vertices.push(new THREE.Vector3(i, this.origin.y, this.origin.z));
+          }
+
+          if(computeXY){
+            this.xySubGridGeometry.vertices.push(new THREE.Vector3(i, width, this.origin.z));
+            this.xySubGridGeometry.vertices.push(new THREE.Vector3(i, this.origin.y, this.origin.z));
+          }
+
+          if(computeYZ){
+            this.yzSubGridGeometry.vertices.push(new THREE.Vector3(i, width, this.origin.z));
+            this.yzSubGridGeometry.vertices.push(new THREE.Vector3(i, this.origin.y, this.origin.z));
+          }
+
+          if (i % step == 0) {
+            if(computeXZ){
+              this.xzGridGeometry.vertices.push(new THREE.Vector3(i, -width, this.origin.z));
+              this.xzGridGeometry.vertices.push(new THREE.Vector3(i, this.origin.y, this.origin.z));
+            }
+
+            if(computeXY){
+              this.xyGridGeometry.vertices.push(new THREE.Vector3(i, width, this.origin.z));
+              this.xyGridGeometry.vertices.push(new THREE.Vector3(i, this.origin.y, this.origin.z));
+            }
+
+            if(computeYZ){
+              this.yzGridGeometry.vertices.push(new THREE.Vector3(i, width, this.origin.z));
+              this.yzGridGeometry.vertices.push(new THREE.Vector3(i, this.origin.y, this.origin.z));
+            }
+          }
+        }
+      }
+      else{
+        console.log("computeGridVertices: Nothing to compute, please specify a grid");
       }
     }
   }, {
-    key: "setTextColor",
-    value: function setTextColor(color) {
-      this.textColor = color;
-      this._drawNumbering();
+    key: "removeGrid",
+    value: function removeGrid(args) {
+      var removeXZ = (args !== undefined && args.removeXZ !== undefined) ? args.removeXZ : false;
+      var removeXY = (args !== undefined && args.removeXY !== undefined) ? args.removeXY : false;
+      var removeYZ = (args !== undefined && args.removeYZ !== undefined) ? args.removeYZ : false;
+
+      if(!remove_XZ && !remove_XY && !remove_YZ)
+        return;
+
+      if(removeXZ){
+        if(this.xzMainGrid !== undefined)
+          this.remove(this.xzMainGrid);
+        if(this.xzSubGrid !== undefined)
+          this.remove(this.xzSubGrid);
+      }
+      if(removeXY){
+        if(this.xyMainGrid !== undefined)
+          this.remove(this.xyMainGrid);
+        if(this.xySubGrid !== undefined)
+          this.remove(this.xySubGrid);
+      }
+      if(removeYZ){
+        if(this.yzMainGrid !== undefined)
+          this.remove(this.yzMainGrid);
+        if(this.yzSubGrid !== undefined)
+          this.remove(this.yzSubGrid);
+      }
+
+      if(this.xAxis !== undefined)
+        this.remove(this.xAxis);
+      if(this.yAxis !== undefined)
+        this.remove(this.yAxis);
+      if(this.zAxis !== undefined)
+        this.remove(this.zAxis);
+      if(this.xRayLine !== undefined)
+        this.remove(this.xRayLine);
+      if(this.yRayLine !== undefined)
+        this.remove(this.yRayLine);
+      if(this.zRayLine !== undefined)
+        this.remove(this.zRayLine);
     }
   }, {
-    key: "setTextLocation",
-    value: function setTextLocation(location) {
-      this.textLocation = location;
-      return this._drawNumbering();
+    key: "setXZopacity",
+    value: function setXZopacity(opacity) {
+      this.xzOpacity = opacity;
+      this.xzMainGrid.material.opacity = opacity;
+      this.xzSubGrid.material.opacity = opacity / 2;
+    }
+  }, {
+    key: "setXYopacity",
+    value: function setXYopacity(opacity) {
+      this.xyOpacity = opacity;
+      this.xyMainGrid.material.opacity = opacity;
+      this.xySubGrid.material.opacity = opacity / 2;
+    }
+  }, {
+    key: "setYZopacity",
+    value: function setYZopacity(opacity) {
+      this.yzOpacity = opacity;
+      this.yzMainGrid.material.opacity = opacity;
+      this.yzSubGrid.material.opacity = opacity / 2;
+    }
+  }, {
+    key: "setXZcolor",
+    value: function setXZcolor(color) {
+      this.xzColor = color;
+      this.xzMainGrid.material.color = new THREE.Color().setHex(this.xzColor);
+      this.xzSubGrid.material.color = new THREE.Color().setHex(this.xzColor);
+    }
+  }, {
+    key: "setXYcolor",
+    value: function setXYcolor(color) {
+      this.xyColor = color;
+      this.xyMainGrid.material.color = new THREE.Color().setHex(this.xyColor);
+      this.xySubGrid.material.color = new THREE.Color().setHex(this.xyColor);
+    }
+  }, {
+    key: "setYZcolor",
+    value: function setYZcolor(color) {
+      this.yzColor = color;
+      this.yzMainGrid.material.color = new THREE.Color().setHex(this.yzColor);
+      this.yzSubGrid.material.color = new THREE.Color().setHex(this.yzColor);
+    }
+  }, {
+    key: "setOrigin",
+    value: function setOrigin(position) {
+      var x = (position !== undefined && position.x !== undefined) ? position.x : 0;
+      var y = (position !== undefined && position.y !== undefined) ? position.y : 0;
+      var z = (position !== undefined && position.z !== undefined) ? position.z : 0;
+
+      if(this.origin.x != x && this.origin.y != y && this.origin.z != z){
+        this.origin = {x: x, y: y, z: z};
+        removePlane({ removeXZ: true, removeXY: true, removeYZ: true });
+        return this._draw3DCoordSys({ drawXZ: true, drawXY: true, drawYZ: true });
+      }
+    }
+  }, {
+    key: "setOriginAndResize",
+    value: function setOriginAndResize(args) {
+      var xOrigin = (args.origin !== undefined && args.origin.x !== undefined) ? args.origin.x : 0;
+      var yOrigin = (args.origin !== undefined && args.origin.y !== undefined) ? args.origin.y : 0;
+      var zOrigin = (args.origin !== undefined && args.origin.z !== undefined) ? args.origin.z : 0;
+      var step = (args.step !== undefined) ? args.step : this.step;
+      var stepSubDivisions = (args.stepSubDivisions !== undefined) ? args.stepSubDivisions : this.stepSubDivisions;
+
+      if(this.origin.x != x && this.origin.y != y && this.origin.z != z){
+        this.origin = {x: x, y: y, z: z};
+        this.step = step;
+        this.stepSubDivisions = stepSubDivisions;
+
+        removePlane({ removeXZ: true, removeXY: true, removeYZ: true });
+        return this._draw3DCoordSys({ drawXZ: true, drawXY: true, drawYZ: true });
+      }
     }
   }, {
     key: "resizeXZ",
@@ -569,10 +530,8 @@ var CoordSys3D = function(_THREE$Object3D){
         this.xzWidth = width;
         this.xzLength = length;
 
-        this.remove(this.xzMainGrid);
-        this.remove(this.xzSubGrid);
-        this.remove(this.xzMargin);
-        return this._draw3DGrid({drawXZ: true});
+        removePlane({removeXZ: true});
+        return this._draw3DCoordSys({drawXZ: true});
       }
     }
   }, {
@@ -582,10 +541,8 @@ var CoordSys3D = function(_THREE$Object3D){
         this.xyWidth = width;
         this.xyLength = length;
 
-        this.remove(this.xyMainGrid);
-        this.remove(this.xySubGrid);
-        this.remove(this.xyMargin);
-        return this._draw3DGrid({drawXY: true});
+        removePlane({removeXY: true});
+        return this._draw3DCoordSys({drawXY: true});
       }
     }
   }, {
@@ -595,150 +552,9 @@ var CoordSys3D = function(_THREE$Object3D){
         this.yzWidth = width;
         this.yzLength = length;
 
-        this.remove(this.yzMainGrid);
-        this.remove(this.yzSubGrid);
-        this.remove(this.yzMargin);
-        return this._draw3DGrid({drawYZ: true});
+        removePlane({removeYZ: true});
+        return this._draw3DCoordSys({drawYZ: true});
       }
-    }
-  }, {
-    key: "_drawNumbering",
-    value: function _drawNumbering() {
-      var label, sizeLabel, sizeLabel2, xLabelsLeft, xLabelsRight, yLabelsBack, yLabelsFront;
-      var step = this.step;
-
-      this._labelStore = {};
-
-      if (this.labels != null) {
-        this.mainGrid.remove(this.labels);
-      }
-      this.labels = new THREE.Object3D();
-
-      var width = this.width;
-      var length = this.length;
-      var numbering = this.numbering = "centerBased";
-
-      var labelsFront = new THREE.Object3D();
-      /*
-      var labelsBack = new THREE.Object3D();
-      var labelsSideRight = new THREE.Object3D();
-      var labelsSideLeft = new THREE.Object3D();
-      */
-
-      if (numbering == "centerBased") {
-
-        for (var i = step; i <= width / 2; i += step) {
-          var sizeLabel = this.drawTextOnPlane("" + i, 32);
-          var sizeLabel2 = this.drawTextOnPlane("" + i, 32);
-          /*
-          var sizeLabel3 = sizeLabel2.clone();
-          var sizeLabel4 = sizeLabel.clone();
-          */
-
-          sizeLabel.position.set(length / 2, -i, 0);
-          sizeLabel.rotation.z = -Math.PI / 2;
-          labelsFront.add(sizeLabel);
-
-          sizeLabel2.position.set(length / 2, -i, 0);
-          sizeLabel2.rotation.x = -Math.PI;
-          sizeLabel2.rotation.z = -Math.PI / 2;
-          labelsFront.add(sizeLabel2);
-
-          /*
-          sizeLabel3.position.set(length / 2, -i, 0);
-          sizeLabel3.rotation.z = -Math.PI/2;
-          labelsBack.add(sizeLabel3);
-          labelsBack.rotation.z = -Math.PI;
-
-          sizeLabel4.position.set(length / 2, i, 0);
-          sizeLabel4.rotation.z = -Math.PI/2;
-          labelsBack.add(sizeLabel4);
-          labelsBack.rotation.z = -Math.PI;
-          */
-
-        }
-
-        /*
-        for (var i = 0; i <= length / 2; i += step) {
-          var sizeLabel = this.drawTextOnPlane("" + i, 32);
-          var sizeLabel2 = this.drawTextOnPlane("" - i, 32);
-          var sizeLabel3 = sizeLabel.clone();
-          var sizeLabel4 = sizeLabel2.clone();
-
-          sizeLabel.position.set(i, width / 2, 0);
-          labelsSideRight.add(sizeLabel);
-
-          sizeLabel2.position.set(-i, width / 2, 0);
-          labelsSideRight.add(sizeLabel2);
-
-          sizeLabel3.position.set(-i, width / 2, 0);
-          labelsSideLeft.add(sizeLabel3);
-          labelsSideLeft.rotation.z = -Math.PI;
-
-          sizeLabel4.position.set(i, width / 2, 0);
-          labelsSideLeft.add(sizeLabel4);
-          labelsSideLeft.rotation.z = -Math.PI;
-        }
-        */
-      }
-
-      this.labels.add(labelsFront);
-      /*
-      this.labels.add(labelsBack);
-      this.labels.add(labelsSideRight);
-      this.labels.add(labelsSideLeft);
-      */
-
-      //apply visibility settings to all labels
-      var textVisible = this.text;
-      this.labels.traverse(function (child) {
-        child.visible = textVisible;
-      });
-      this.mainGrid.add(this.labels);
-    }
-  },  {
-    key: "_textRotateZ",
-    value: function _textRotateZ(rads){
-      this.labels.rotateZ(rads);
-    }
-  }, {
-    key: "drawTextOnPlane",
-    value: function drawTextOnPlane(text, size) {
-      var canvas, context, material, plane, texture;
-
-      if (size == null) {
-        size = 256;
-      }
-
-      canvas = document.createElement('canvas');
-      var size = 128;
-      canvas.width = size;
-      canvas.height = size;
-      context = canvas.getContext('2d');
-      context.font = "8px Arial";
-      context.textAlign = 'center';
-      context.fillStyle = this.textColor;
-      context.fillText(text, canvas.width / 2, canvas.height / 2);
-      context.strokeStyle = this.textColor;
-      context.strokeText(text, canvas.width / 2, canvas.height / 2);
-
-      texture = new THREE.Texture(canvas);
-      texture.needsUpdate = true;
-      texture.generateMipmaps = true;
-      texture.magFilter = THREE.LinearFilter;
-      texture.minFilter = THREE.LinearFilter;
-
-      material = new THREE.MeshBasicMaterial({
-        map: texture,
-        transparent: true,
-        color: 0xffffff,
-        alphaTest: 0.6
-      });
-      plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(size / 8, size / 8), material);
-      plane.doubleSided = true;
-      plane.overdraw = true;
-
-      return plane;
     }
   }]);
 
