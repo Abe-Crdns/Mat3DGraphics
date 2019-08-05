@@ -7,10 +7,10 @@ import { CoordSys3D } from './coordinate_system/CoordSys3D.js'
 
 // global program variables
 var RENDERER, SCENE, CAMERA, CONTROLS, RAYCASTER;
+var GEOMETRY, MESH, _3D_GRID;
+
 var MOUSE = new THREE.Vector2();
 var INTERSECT_OBJS = [];
-
-var GEOMETRY, MESH, _3D_GRID;
 var TRANSFM_ARR = [];
 
 /**
@@ -134,14 +134,18 @@ function updateRayCaster(){
     var yRayLineGeo = _3D_GRID.yRayLine.geometry;
     var zRayLineGeo = _3D_GRID.zRayLine.geometry;
 
-    xRayLineGeo.setPositions([ _3D_GRID.origin.x, intersect_pt.y + _3D_GRID.origin.y, intersect_pt.z + _3D_GRID.origin.z,
-                               intersect_pt.x + _3D_GRID.origin.x, intersect_pt.y + _3D_GRID.origin.y, intersect_pt.z + _3D_GRID.origin.z ]);
+    var xOriginAbs = _3D_GRID.origin.x;
+    var yOriginAbs = _3D_GRID.origin.y;
+    var zOriginAbs = _3D_GRID.origin.z;
 
-    yRayLineGeo.setPositions([ intersect_pt.x + _3D_GRID.origin.x, _3D_GRID.origin.y, intersect_pt.z + _3D_GRID.origin.z,
-                               intersect_pt.x + _3D_GRID.origin.x, intersect_pt.y + _3D_GRID.origin.y, intersect_pt.z + _3D_GRID.origin.z]);
+    xRayLineGeo.setPositions([ xOriginAbs, intersect_pt.y, intersect_pt.z,
+                               intersect_pt.x, intersect_pt.y, intersect_pt.z ]);
 
-    zRayLineGeo.setPositions([ intersect_pt.x + _3D_GRID.origin.x, intersect_pt.y + _3D_GRID.origin.y, _3D_GRID.origin.z,
-                               intersect_pt.x + _3D_GRID.origin.x, intersect_pt.y + _3D_GRID.origin.y, intersect_pt.z + _3D_GRID.origin.z]);
+    yRayLineGeo.setPositions([ intersect_pt.x, yOriginAbs, intersect_pt.z,
+                               intersect_pt.x, intersect_pt.y, intersect_pt.z ]);
+
+    zRayLineGeo.setPositions([ intersect_pt.x, intersect_pt.y, zOriginAbs,
+                               intersect_pt.x, intersect_pt.y, intersect_pt.z ]);
 
     _3D_GRID.xRayLine.computeLineDistances();
     _3D_GRID.yRayLine.computeLineDistances();
@@ -195,6 +199,10 @@ function readByFileType(){
         GEOMETRY.sourceType = "obj";
         GEOMETRY.sourceFile = filename;
 
+        GEOMETRY.boundingBox = new THREE.Box3();
+        GEOMETRY.boundingBox.setFromObject(GEOMETRY);
+        checkGeometryBoundBox(GEOMETRY.boundingBox);
+
         var material = new THREE.MeshStandardMaterial();
         MESH = new THREE.Mesh(GEOMETRY, material);
 
@@ -224,6 +232,10 @@ function readByFileType(){
         GEOMETRY = new THREE.STLLoader().parse(contents);
         GEOMETRY.sourceType = "stl";
         GEOMETRY.sourceFile = filename;
+
+        GEOMETRY.boundingBox = new THREE.Box3();
+        GEOMETRY.boundingBox.setFromObject(GEOMETRY);
+        checkGeometryBoundBox(GEOMETRY.boundingBox);
 
         var material = new THREE.MeshStandardMaterial();
         MESH = new THREE.Mesh(geometry, material);
@@ -293,6 +305,10 @@ function readByFileType(){
            GEOMETRY = objLoader.setMaterials(materials).parse(resObj);
            GEOMETRY.sourceType = "zip";
            GEOMETRY.sourceObjFile = objFile;
+
+           GEOMETRY.boundingBox = new THREE.Box3();
+           GEOMETRY.boundingBox.setFromObject(GEOMETRY);
+           checkGeometryBoundBox(GEOMETRY.boundingBox);
 
            MESH = new THREE.Mesh(GEOMETRY, materials);
 
@@ -608,7 +624,6 @@ function handleTransfm(num, transformType, dir){
 * @param {string} - The GEOMETRY type to display.
 */
 function handleObjectType(objType){
-
   switch(objType){
     case 'Cube':
     case 'Teapot':
@@ -651,8 +666,31 @@ function handleObjectType(objType){
     default: break;
   }
 
-  // check object dimensions and readjust coordinate system
   CAMERA.position.x = 5;
   CAMERA.position.y = 5;
   CAMERA.position.z = 5;
+}
+
+function checkGeometryBoundBox(boundingBox){
+  // check object dimensions and readjust coordinate system (if need be)
+  var xOrigin = _3D_GRID.origin.x;
+  var yOrigin = _3D_GRID.origin.y;
+  var zOrigin = _3D_GRID.origin.z;
+
+  if(boundingBox.min.x != _3D_GRID.origin.x)
+    xOrigin = boundingBox.min.x;
+  if(boundingBox.min.y != _3D_GRID.origin.y)
+    yOrigin = boundingBox.min.y;
+  if(boundingBox.min.y != _3D_GRID.origin.y)
+    zOrigin = boundingBox.min.x;
+
+  if(xOrigin !== _3D_GRID.origin.x ||
+     yOrigin !== _3D_GRID.origin.y ||
+     zOrigin !== _3D_GRID.origin.z){
+       
+    _3D_GRID.setOrigin({ x: xOrigin,
+                         y: yOrigin,
+                         z: zOrigin
+                      });
+  }
 }

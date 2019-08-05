@@ -91,7 +91,6 @@ var CoordSys3D = function(_THREE$Object3D){
 
     _this.name = "";
 
-
     _this._draw3DCoordSys({drawXZ: drawXZ, drawXY: drawXY, drawYZ: drawYZ});
 
     return _this;
@@ -241,7 +240,6 @@ var CoordSys3D = function(_THREE$Object3D){
       var initRayLinesPos = [ this.origin.x, this.origin.y, this.origin.z,
                               this.origin.x, this.origin.y, this.origin.z ];
 
-                              console.log(this.origin.x);
       xAxisGeometry.setPositions([ this.origin.x, this.origin.y, this.origin.z,
                                    this.xyLength + this.origin.x, this.origin.y, this.origin.z ]);
       yAxisGeometry.setPositions([ this.origin.x, this.origin.y, this.origin.z,
@@ -336,10 +334,11 @@ var CoordSys3D = function(_THREE$Object3D){
       var stepSubDivisions = this.stepSubDivisions;
 
       if(computeXZ || computeXY || computeYZ){
+
         for(var i = -width; i < 0; i += step / stepSubDivisions){
           if(computeXZ){
-            var pt1 = new THREE.Vector3(this.origin.x, i - this.origin.y, this.origin.z);
-            var pt2 = new THREE.Vector3(length + this.origin.x, i - this.origin.y, this.origin.z);
+            var pt1 = new THREE.Vector3(this.origin.x, i - this.origin.z, this.origin.y);
+            var pt2 = new THREE.Vector3(length + this.origin.x, i - this.origin.z, this.origin.y);
             this.xzSubGridGeometry.vertices.push(pt1);
             this.xzSubGridGeometry.vertices.push(pt2);
           }
@@ -352,16 +351,16 @@ var CoordSys3D = function(_THREE$Object3D){
           }
 
           if(computeYZ){
-            var pt1 = new THREE.Vector3(this.origin.x, -i + this.origin.y, -this.origin.z);
-            var pt2 = new THREE.Vector3(length + this.origin.x, -i + this.origin.y, -this.origin.z);
+            var pt1 = new THREE.Vector3(this.origin.z, -i + this.origin.y, -this.origin.x);
+            var pt2 = new THREE.Vector3(length + this.origin.z, -i + this.origin.y, -this.origin.x);
             this.yzSubGridGeometry.vertices.push(pt1);
             this.yzSubGridGeometry.vertices.push(pt2);
           }
 
           if (i % step == 0) {
             if(computeXZ){
-              var pt1 = new THREE.Vector3(this.origin.x, i - this.origin.y, this.origin.z);
-              var pt2 = new THREE.Vector3(length + this.origin.x, i - this.origin.y, this.origin.z);
+              var pt1 = new THREE.Vector3(this.origin.x, i - this.origin.z, this.origin.y);
+              var pt2 = new THREE.Vector3(length + this.origin.x, i - this.origin.z, this.origin.y);
               this.xzGridGeometry.vertices.push(pt1);
               this.xzGridGeometry.vertices.push(pt2);
             }
@@ -374,8 +373,8 @@ var CoordSys3D = function(_THREE$Object3D){
             }
 
             if(computeYZ){
-              var pt1 = new THREE.Vector3(this.origin.x, -i + this.origin.y, -this.origin.z);
-              var pt2 = new THREE.Vector3(length + this.origin.x, -i + this.origin.y, -this.origin.z);
+              var pt1 = new THREE.Vector3(this.origin.z, -i + this.origin.y, -this.origin.x);
+              var pt2 = new THREE.Vector3(length + this.origin.z, -i + this.origin.y, -this.origin.x);
               this.yzGridGeometry.vertices.push(pt1);
               this.yzGridGeometry.vertices.push(pt2);
             }
@@ -384,8 +383,8 @@ var CoordSys3D = function(_THREE$Object3D){
 
         for (var i = step / stepSubDivisions; i <= length; i += step / stepSubDivisions) {
           if(computeXZ){
-            var pt1 = new THREE.Vector3(i + this.origin.x, -width - this.origin.y, this.origin.z);
-            var pt2 = new THREE.Vector3(i + this.origin.x, -this.origin.y, this.origin.z);
+            var pt1 = new THREE.Vector3(i + this.origin.x, -width - this.origin.z, this.origin.y);
+            var pt2 = new THREE.Vector3(i + this.origin.x, -this.origin.z, this.origin.y);
             this.xzSubGridGeometry.vertices.push(pt1);
             this.xzSubGridGeometry.vertices.push(pt2);
           }
@@ -398,16 +397,16 @@ var CoordSys3D = function(_THREE$Object3D){
           }
 
           if(computeYZ){
-            var pt1 = new THREE.Vector3(i + this.origin.x, width + this.origin.y, -this.origin.z);
-            var pt2 = new THREE.Vector3(i + this.origin.x, this.origin.y, -this.origin.z);
+            var pt1 = new THREE.Vector3(i + this.origin.z, width + this.origin.y, -this.origin.x);
+            var pt2 = new THREE.Vector3(i + this.origin.z, this.origin.y, -this.origin.x);
             this.yzSubGridGeometry.vertices.push(pt1);
             this.yzSubGridGeometry.vertices.push(pt2);
           }
 
           if (i % step == 0) {
             if(computeXZ){
-              var pt1 = new THREE.Vector3(i + this.origin.x, -width - this.origin.y, this.origin.z);
-              var pt2 = new THREE.Vector3(i + this.origin.x, -this.origin.y, this.origin.z);
+              var pt1 = new THREE.Vector3(i + this.origin.x, -width - this.origin.z, this.origin.y);
+              var pt2 = new THREE.Vector3(i + this.origin.x, -this.origin.z, this.origin.y);
               this.xzGridGeometry.vertices.push(pt1);
               this.xzGridGeometry.vertices.push(pt2);
             }
@@ -420,8 +419,8 @@ var CoordSys3D = function(_THREE$Object3D){
             }
 
             if(computeYZ){
-              var pt1 = new THREE.Vector3(i + this.origin.x, width + this.origin.y, -this.origin.z);
-              var pt2 = new THREE.Vector3(i + this.origin.x, this.origin.y, -this.origin.z);
+              var pt1 = new THREE.Vector3(i + this.origin.z, width + this.origin.y, -this.origin.x);
+              var pt2 = new THREE.Vector3(i + this.origin.z, this.origin.y, -this.origin.x);
               this.yzGridGeometry.vertices.push(pt1);
               this.yzGridGeometry.vertices.push(pt2);
             }
@@ -439,40 +438,39 @@ var CoordSys3D = function(_THREE$Object3D){
       var removeXY = (args !== undefined && args.removeXY !== undefined) ? args.removeXY : false;
       var removeYZ = (args !== undefined && args.removeYZ !== undefined) ? args.removeYZ : false;
 
-      if(!remove_XZ && !remove_XY && !remove_YZ)
-        return;
+      if(removeXZ || removeXY || removeYZ){
+        if(removeXZ){
+          if(this.xzMainGrid !== undefined)
+            this.remove(this.xzMainGrid);
+          if(this.xzSubGrid !== undefined)
+            this.remove(this.xzSubGrid);
+        }
+        if(removeXY){
+          if(this.xyMainGrid !== undefined)
+            this.remove(this.xyMainGrid);
+          if(this.xySubGrid !== undefined)
+            this.remove(this.xySubGrid);
+        }
+        if(removeYZ){
+          if(this.yzMainGrid !== undefined)
+            this.remove(this.yzMainGrid);
+          if(this.yzSubGrid !== undefined)
+            this.remove(this.yzSubGrid);
+        }
 
-      if(removeXZ){
-        if(this.xzMainGrid !== undefined)
-          this.remove(this.xzMainGrid);
-        if(this.xzSubGrid !== undefined)
-          this.remove(this.xzSubGrid);
+        if(this.xAxis !== undefined)
+          this.remove(this.xAxis);
+        if(this.yAxis !== undefined)
+          this.remove(this.yAxis);
+        if(this.zAxis !== undefined)
+          this.remove(this.zAxis);
+        if(this.xRayLine !== undefined)
+          this.remove(this.xRayLine);
+        if(this.yRayLine !== undefined)
+          this.remove(this.yRayLine);
+        if(this.zRayLine !== undefined)
+          this.remove(this.zRayLine);
       }
-      if(removeXY){
-        if(this.xyMainGrid !== undefined)
-          this.remove(this.xyMainGrid);
-        if(this.xySubGrid !== undefined)
-          this.remove(this.xySubGrid);
-      }
-      if(removeYZ){
-        if(this.yzMainGrid !== undefined)
-          this.remove(this.yzMainGrid);
-        if(this.yzSubGrid !== undefined)
-          this.remove(this.yzSubGrid);
-      }
-
-      if(this.xAxis !== undefined)
-        this.remove(this.xAxis);
-      if(this.yAxis !== undefined)
-        this.remove(this.yAxis);
-      if(this.zAxis !== undefined)
-        this.remove(this.zAxis);
-      if(this.xRayLine !== undefined)
-        this.remove(this.xRayLine);
-      if(this.yRayLine !== undefined)
-        this.remove(this.yRayLine);
-      if(this.zRayLine !== undefined)
-        this.remove(this.zRayLine);
     }
   }, {
     key: "setXZopacity",
@@ -525,7 +523,7 @@ var CoordSys3D = function(_THREE$Object3D){
 
       if(this.origin.x != x && this.origin.y != y && this.origin.z != z){
         this.origin = {x: x, y: y, z: z};
-        removePlane({ removeXZ: true, removeXY: true, removeYZ: true });
+        this.removeGrid({ removeXZ: true, removeXY: true, removeYZ: true });
         return this._draw3DCoordSys({ drawXZ: true, drawXY: true, drawYZ: true });
       }
     }
@@ -543,7 +541,7 @@ var CoordSys3D = function(_THREE$Object3D){
         this.step = step;
         this.stepSubDivisions = stepSubDivisions;
 
-        removePlane({ removeXZ: true, removeXY: true, removeYZ: true });
+        this.removeGrid({ removeXZ: true, removeXY: true, removeYZ: true });
         return this._draw3DCoordSys({ drawXZ: true, drawXY: true, drawYZ: true });
       }
     }
@@ -554,7 +552,7 @@ var CoordSys3D = function(_THREE$Object3D){
         this.xzWidth = width;
         this.xzLength = length;
 
-        removePlane({removeXZ: true});
+        this.removeGrid({removeXZ: true});
         return this._draw3DCoordSys({drawXZ: true});
       }
     }
@@ -565,7 +563,7 @@ var CoordSys3D = function(_THREE$Object3D){
         this.xyWidth = width;
         this.xyLength = length;
 
-        removePlane({removeXY: true});
+        this.removeGrid({removeXY: true});
         return this._draw3DCoordSys({drawXY: true});
       }
     }
@@ -576,7 +574,7 @@ var CoordSys3D = function(_THREE$Object3D){
         this.yzWidth = width;
         this.yzLength = length;
 
-        removePlane({removeYZ: true});
+        this.removeGrid({removeYZ: true});
         return this._draw3DCoordSys({drawYZ: true});
       }
     }
