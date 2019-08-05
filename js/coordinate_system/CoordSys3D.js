@@ -241,12 +241,13 @@ var CoordSys3D = function(_THREE$Object3D){
       var initRayLinesPos = [ this.origin.x, this.origin.y, this.origin.z,
                               this.origin.x, this.origin.y, this.origin.z ];
 
+                              console.log(this.origin.x);
       xAxisGeometry.setPositions([ this.origin.x, this.origin.y, this.origin.z,
-                                   this.xyLength, this.origin.y, this.origin.z ]);
+                                   this.xyLength + this.origin.x, this.origin.y, this.origin.z ]);
       yAxisGeometry.setPositions([ this.origin.x, this.origin.y, this.origin.z,
-                                   this.origin.x, this.xyLength, this.origin.z ]);
+                                   this.origin.x, this.xyLength + this.origin.y, this.origin.z ]);
       zAxisGeometry.setPositions([ this.origin.x, this.origin.y, this.origin.z,
-                                   this.origin.x, this.origin.y, this.yzLength ]);
+                                   this.origin.x, this.origin.y, this.yzLength + this.origin.z]);
       xRayLineGeometry.setPositions(initRayLinesPos);
       yRayLineGeometry.setPositions(initRayLinesPos);
       zRayLineGeometry.setPositions(initRayLinesPos);
@@ -335,71 +336,94 @@ var CoordSys3D = function(_THREE$Object3D){
       var stepSubDivisions = this.stepSubDivisions;
 
       if(computeXZ || computeXY || computeYZ){
-
         for(var i = -width; i < 0; i += step / stepSubDivisions){
           if(computeXZ){
-            this.xzSubGridGeometry.vertices.push(new THREE.Vector3(this.origin.x, i, this.origin.z));
-            this.xzSubGridGeometry.vertices.push(new THREE.Vector3(length, i, this.origin.z));
+            var pt1 = new THREE.Vector3(this.origin.x, i - this.origin.y, this.origin.z);
+            var pt2 = new THREE.Vector3(length + this.origin.x, i - this.origin.y, this.origin.z);
+            this.xzSubGridGeometry.vertices.push(pt1);
+            this.xzSubGridGeometry.vertices.push(pt2);
           }
 
           if(computeXY){
-            this.xySubGridGeometry.vertices.push(new THREE.Vector3(this.origin.x, -i, this.origin.z));
-            this.xySubGridGeometry.vertices.push(new THREE.Vector3(length, -i, this.origin.z));
+            var pt1 = new THREE.Vector3(this.origin.x, -i + this.origin.y, this.origin.z);
+            var pt2 = new THREE.Vector3(length + this.origin.x, -i + this.origin.y, this.origin.z);
+            this.xySubGridGeometry.vertices.push(pt1);
+            this.xySubGridGeometry.vertices.push(pt2);
           }
 
           if(computeYZ){
-            this.yzSubGridGeometry.vertices.push(new THREE.Vector3(this.origin.x, -i, this.origin.z));
-            this.yzSubGridGeometry.vertices.push(new THREE.Vector3(length, -i, this.origin.z));
+            var pt1 = new THREE.Vector3(this.origin.x, -i + this.origin.y, -this.origin.z);
+            var pt2 = new THREE.Vector3(length + this.origin.x, -i + this.origin.y, -this.origin.z);
+            this.yzSubGridGeometry.vertices.push(pt1);
+            this.yzSubGridGeometry.vertices.push(pt2);
           }
 
           if (i % step == 0) {
             if(computeXZ){
-              this.xzGridGeometry.vertices.push(new THREE.Vector3(this.origin.x, i, this.origin.z));
-              this.xzGridGeometry.vertices.push(new THREE.Vector3(length, i, this.origin.z));
+              var pt1 = new THREE.Vector3(this.origin.x, i - this.origin.y, this.origin.z);
+              var pt2 = new THREE.Vector3(length + this.origin.x, i - this.origin.y, this.origin.z);
+              this.xzGridGeometry.vertices.push(pt1);
+              this.xzGridGeometry.vertices.push(pt2);
             }
 
             if(computeXY){
-              this.xyGridGeometry.vertices.push(new THREE.Vector3(this.origin.x, -i, this.origin.z));
-              this.xyGridGeometry.vertices.push(new THREE.Vector3(length, -i, this.origin.z));
+              var pt1 = new THREE.Vector3(this.origin.x, -i + this.origin.y, this.origin.z);
+              var pt2 = new THREE.Vector3(length + this.origin.x, -i + this.origin.y, this.origin.z);
+              this.xyGridGeometry.vertices.push(pt1);
+              this.xyGridGeometry.vertices.push(pt2);
             }
 
             if(computeYZ){
-              this.yzGridGeometry.vertices.push(new THREE.Vector3(this.origin.x, -i, this.origin.z));
-              this.yzGridGeometry.vertices.push(new THREE.Vector3(length, -i, this.origin.z));
+              var pt1 = new THREE.Vector3(this.origin.x, -i + this.origin.y, -this.origin.z);
+              var pt2 = new THREE.Vector3(length + this.origin.x, -i + this.origin.y, -this.origin.z);
+              this.yzGridGeometry.vertices.push(pt1);
+              this.yzGridGeometry.vertices.push(pt2);
             }
           }
         }
 
         for (var i = step / stepSubDivisions; i <= length; i += step / stepSubDivisions) {
           if(computeXZ){
-            this.xzSubGridGeometry.vertices.push(new THREE.Vector3(i, -width, this.origin.z));
-            this.xzSubGridGeometry.vertices.push(new THREE.Vector3(i, this.origin.y, this.origin.z));
+            var pt1 = new THREE.Vector3(i + this.origin.x, -width - this.origin.y, this.origin.z);
+            var pt2 = new THREE.Vector3(i + this.origin.x, -this.origin.y, this.origin.z);
+            this.xzSubGridGeometry.vertices.push(pt1);
+            this.xzSubGridGeometry.vertices.push(pt2);
           }
 
           if(computeXY){
-            this.xySubGridGeometry.vertices.push(new THREE.Vector3(i, width, this.origin.z));
-            this.xySubGridGeometry.vertices.push(new THREE.Vector3(i, this.origin.y, this.origin.z));
+            var pt1 = new THREE.Vector3(i + this.origin.x, width + this.origin.y, this.origin.z);
+            var pt2 = new THREE.Vector3(i + this.origin.x, this.origin.y, this.origin.z);
+            this.xySubGridGeometry.vertices.push(pt1);
+            this.xySubGridGeometry.vertices.push(pt2);
           }
 
           if(computeYZ){
-            this.yzSubGridGeometry.vertices.push(new THREE.Vector3(i, width, this.origin.z));
-            this.yzSubGridGeometry.vertices.push(new THREE.Vector3(i, this.origin.y, this.origin.z));
+            var pt1 = new THREE.Vector3(i + this.origin.x, width + this.origin.y, -this.origin.z);
+            var pt2 = new THREE.Vector3(i + this.origin.x, this.origin.y, -this.origin.z);
+            this.yzSubGridGeometry.vertices.push(pt1);
+            this.yzSubGridGeometry.vertices.push(pt2);
           }
 
           if (i % step == 0) {
             if(computeXZ){
-              this.xzGridGeometry.vertices.push(new THREE.Vector3(i, -width, this.origin.z));
-              this.xzGridGeometry.vertices.push(new THREE.Vector3(i, this.origin.y, this.origin.z));
+              var pt1 = new THREE.Vector3(i + this.origin.x, -width - this.origin.y, this.origin.z);
+              var pt2 = new THREE.Vector3(i + this.origin.x, -this.origin.y, this.origin.z);
+              this.xzGridGeometry.vertices.push(pt1);
+              this.xzGridGeometry.vertices.push(pt2);
             }
 
             if(computeXY){
-              this.xyGridGeometry.vertices.push(new THREE.Vector3(i, width, this.origin.z));
-              this.xyGridGeometry.vertices.push(new THREE.Vector3(i, this.origin.y, this.origin.z));
+              var pt1 = new THREE.Vector3(i + this.origin.x, width + this.origin.y, this.origin.z);
+              var pt2 = new THREE.Vector3(i + this.origin.x, this.origin.y, this.origin.z);
+              this.xyGridGeometry.vertices.push(pt1);
+              this.xyGridGeometry.vertices.push(pt2);
             }
 
             if(computeYZ){
-              this.yzGridGeometry.vertices.push(new THREE.Vector3(i, width, this.origin.z));
-              this.yzGridGeometry.vertices.push(new THREE.Vector3(i, this.origin.y, this.origin.z));
+              var pt1 = new THREE.Vector3(i + this.origin.x, width + this.origin.y, -this.origin.z);
+              var pt2 = new THREE.Vector3(i + this.origin.x, this.origin.y, -this.origin.z);
+              this.yzGridGeometry.vertices.push(pt1);
+              this.yzGridGeometry.vertices.push(pt2);
             }
           }
         }
