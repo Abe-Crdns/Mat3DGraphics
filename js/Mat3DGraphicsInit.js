@@ -172,6 +172,10 @@ function updateRayCaster(){
     _3D_GRID.xRayLine.visible = false;
     _3D_GRID.yRayLine.visible = false;
     _3D_GRID.zRayLine.visible = false;
+
+    DAT_GUI.__controllers[1].setValue('0.0');
+    DAT_GUI.__controllers[2].setValue('0.0');
+    DAT_GUI.__controllers[3].setValue('0.0');
   }
 }
 
