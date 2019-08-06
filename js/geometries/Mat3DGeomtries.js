@@ -9,8 +9,8 @@ const MAT3D_CUBE = function(){
   cube_geo.computeBoundingBox();
 
   var j = 0;
-  var cube_colors = [ 0xffff00, 0x00ffff, 0xff00ff,
-                      0x00fe0e, 0xff8c00, 0x4c4c4c ];
+  var cube_colors = [ 0xffff00, 0xff8c00, 0xff00ff,
+                      0x00fe0e, 0x00ffff, 0x4c4c4c ];
   for(var i = 0; i < cube_geo.faces.length; i+=2){
     cube_geo.faces[i].color.setHex(cube_colors[j]);
     cube_geo.faces[i+1].color.setHex(cube_colors[j]);
@@ -34,6 +34,7 @@ const MAT3D_CUBE = function(){
 const MAT3D_TEAPOT = function(){
   var teapot_geo = new THREE.TeapotBufferGeometry(0.5);
   teapot_geo.name = "mat3dteapot";
+  teapot_geo.computeBoundingBox();
 
   var teapot_material = new THREE.MeshStandardMaterial({ vertexColors: THREE.FaceColors,
                                                          opacity: 0.7,

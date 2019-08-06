@@ -1,5 +1,5 @@
 /**
- * @author Abraham Cardenas https://github.com/Abe-Crdns
+ * @author Abraham Cardenas / https://github.com/Abe-Crdns
  * A 3D variation of the LabeledGrid class at
  * https://github.com/usco/glView-helpers/blob/master/src/grids/LabeledGrid.js
  */
@@ -14,6 +14,7 @@ var CoordSys3D = function(_THREE$Object3D){
   _inherits(CoordSys3D, _THREE$Object3D);
 
   function CoordSys3D(args){
+
     var xzWidth = (args !== undefined && args.xzWidth !== undefined) ? args.xzWidth : 5;
     var xyWidth = (args !== undefined && args.xyWidth !== undefined) ? args.xyWidth : 5;
     var yzWidth = (args !== undefined && args.yzWidth !== undefined) ? args.yzWidth : 5;
@@ -21,6 +22,7 @@ var CoordSys3D = function(_THREE$Object3D){
     var xzLength = (args !== undefined && args.xzLength !== undefined) ? args.xzLength : 5;
     var xyLength = (args !== undefined && args.xyLength !== undefined) ? args.xyLength : 5;
     var yzLength = (args !== undefined && args.yzLength !== undefined) ? args.yzLength : 5;
+
 
     var origin = (args !== undefined && args.origin !== undefined && args.origin.x !== undefined &&
       args.origin.y !== undefined && args.origin.z !== undefined) ? args.origin : {x: 0, y: 0, z: 0};
@@ -381,7 +383,7 @@ var CoordSys3D = function(_THREE$Object3D){
           }
         }
 
-        for (var i = step / stepSubDivisions; i <= length; i += step / stepSubDivisions) {
+        for (var i = step / stepSubDivisions; i <= length; i += step / stepSubDivisions){
           if(computeXZ){
             var pt1 = new THREE.Vector3(i + this.origin.x, -width - this.origin.z, this.origin.y);
             var pt2 = new THREE.Vector3(i + this.origin.x, -this.origin.z, this.origin.y);
@@ -521,23 +523,42 @@ var CoordSys3D = function(_THREE$Object3D){
       var y = (position !== undefined && position.y !== undefined) ? position.y : 0;
       var z = (position !== undefined && position.z !== undefined) ? position.z : 0;
 
-      if(this.origin.x != x && this.origin.y != y && this.origin.z != z){
+      if(this.origin.x != x || this.origin.y != y || this.origin.z != z){
         this.origin = {x: x, y: y, z: z};
         this.removeGrid({ removeXZ: true, removeXY: true, removeYZ: true });
         return this._draw3DCoordSys({ drawXZ: true, drawXY: true, drawYZ: true });
       }
     }
   }, {
-    key: "setOriginAndResize",
-    value: function setOriginAndResize(args) {
+    key: "setOriginAndResizeAll",
+    value: function setOriginAndResizeAll(args) {
       var xOrigin = (args.origin !== undefined && args.origin.x !== undefined) ? args.origin.x : 0;
       var yOrigin = (args.origin !== undefined && args.origin.y !== undefined) ? args.origin.y : 0;
       var zOrigin = (args.origin !== undefined && args.origin.z !== undefined) ? args.origin.z : 0;
-      var step = (args.step !== undefined) ? args.step : this.step;
-      var stepSubDivisions = (args.stepSubDivisions !== undefined) ? args.stepSubDivisions : this.stepSubDivisions;
 
-      if(this.origin.x != x && this.origin.y != y && this.origin.z != z){
-        this.origin = {x: x, y: y, z: z};
+      var xzWidth = (args !== undefined && args.xzWidth !== undefined) ? args.xzWidth : 5;
+      var xyWidth = (args !== undefined && args.xyWidth !== undefined) ? args.xyWidth : 5;
+      var yzWidth = (args !== undefined && args.yzWidth !== undefined) ? args.yzWidth : 5;
+
+      var xzLength = (args !== undefined && args.xzLength !== undefined) ? args.xzLength : 5;
+      var xyLength = (args !== undefined && args.xyLength !== undefined) ? args.xyLength : 5;
+      var yzLength = (args !== undefined && args.yzLength !== undefined) ? args.yzLength : 5;
+
+      var step = (args.step !== undefined) ? args.step : 5;
+      var stepSubDivisions = (args.stepSubDivisions !== undefined) ? args.stepSubDivisions : 5;
+
+      if(this.origin.x != xOrigin || this.origin.y != yOrigin || this.origin.z != zOrigin){
+
+        this.origin = {x: xOrigin, y: yOrigin, z: zOrigin};
+
+        this.xzWidth = xzWidth;
+        this.xyWidth = xyWidth;
+        this.yzWidth = yzWidth;
+
+        this.xzLength = xzLength;
+        this.xyLength = xyLength;
+        this.yzLength = yzLength;
+
         this.step = step;
         this.stepSubDivisions = stepSubDivisions;
 
@@ -547,36 +568,39 @@ var CoordSys3D = function(_THREE$Object3D){
     }
   }, {
     key: "resizeXZ",
-    value: function resize(width, length) {
-      if (width && length) {
-        this.xzWidth = width;
-        this.xzLength = length;
+    value: function resizeXZ(width, length) {
+      var width = (args.width !== undefined && args.width !== undefined) ? args.width : 5;
+      var length = (args.length !== undefined && args.length !== undefined) ? args.length : 5;
 
-        this.removeGrid({removeXZ: true});
-        return this._draw3DCoordSys({drawXZ: true});
-      }
+      this.xzWidth = width;
+      this.xzLength = length;
+
+      this.removeGrid({removeXZ: true});
+      return this._draw3DCoordSys({drawXZ: true});
     }
   }, {
     key: "resizeXY",
-    value: function resize(width, length) {
-      if (width && length) {
-        this.xyWidth = width;
-        this.xyLength = length;
+    value: function resizeXY(width, length) {
+      var width = (args.width !== undefined && args.width !== undefined) ? args.width : 5;
+      var length = (args.length !== undefined && args.length !== undefined) ? args.length : 5;
 
-        this.removeGrid({removeXY: true});
-        return this._draw3DCoordSys({drawXY: true});
-      }
+      this.xyWidth = width;
+      this.xyLength = length;
+
+      this.removeGrid({removeXY: true});
+      return this._draw3DCoordSys({drawXY: true});
     }
   }, {
     key: "resizeYZ",
-    value: function resize(width, length) {
-      if (width && length) {
-        this.yzWidth = width;
-        this.yzLength = length;
+    value: function resizeYZ(width, length) {
+      var width = (args.width !== undefined && args.width !== undefined) ? args.width : 5;
+      var length = (args.length !== undefined && args.length !== undefined) ? args.length : 5;
 
-        this.removeGrid({removeYZ: true});
-        return this._draw3DCoordSys({drawYZ: true});
-      }
+      this.yzWidth = width;
+      this.yzLength = length;
+
+      this.removeGrid({removeYZ: true});
+      return this._draw3DCoordSys({drawYZ: true});
     }
   }]);
 

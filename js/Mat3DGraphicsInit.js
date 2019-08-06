@@ -1,15 +1,17 @@
 /**
- * @author Abraham Cardenas https://github.com/Abe-Crdns
- * @version v2.0
+ *                MAT3D Graphics
+ * @author Abraham Cardenas / https://github.com/Abe-Crdns
+ * @version 2.0
  */
 
 import { CoordSys3D } from './coordinate_system/CoordSys3D.js'
 
 // global program variables
-var RENDERER, SCENE, CAMERA, CONTROLS, RAYCASTER;
-var GEOMETRY, MESH, _3D_GRID;
+var RENDERER, SCENE, CAMERA, CONTROLS;
+var RAYCASTER, GEOMETRY, MESH, _3D_GRID;
 
-var MOUSE = new THREE.Vector2();
+var DAT_GUI = new dat.GUI();
+var MOUSE = new THREE.Vector2(0, 0);
 var INTERSECT_OBJS = [];
 var TRANSFM_ARR = [];
 
@@ -22,14 +24,13 @@ function init(){
   RENDERER = new THREE.WebGLRenderer({canvas: canvas}, {antialias: true});
   RENDERER.setClearColor(0xffffff);
   RENDERER.setSize(window.innerWidth, window.innerHeight);
-  //document.body.appendChild( RENDERER.domElement );
 
   // RAY CASTER
   RAYCASTER = new THREE.Raycaster();
   RAYCASTER.linePrecision = 1;
 
   // CAMERA & SCENE
-  CAMERA = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+  CAMERA = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 5000);
   SCENE = new THREE.Scene();
 
   // CAMERA CONTROLS
@@ -48,37 +49,41 @@ function init(){
   INTERSECT_OBJS.push(MESH);
   SCENE.add(MESH);
 
-  // ADJUST THE SCENE
-  CONTROLS.reset();
-  CAMERA.position.x = 5;
-  CAMERA.position.y = 5;
-  CAMERA.position.z = 5;
-
   // DEFAULT COORDINATE SYSTEM (includes axis and raylines)
-  _3D_GRID = new CoordSys3D();
+  _3D_GRID = new CoordSys3D({origin: {x: -2, y: 0, z: -2}});
   _3D_GRID.name = "My3DGrid";
   SCENE.add(_3D_GRID);
 
   // SETUP GUI
-  var gui = new dat.GUI();
   var customContainer = document.getElementById('a_gui');
-  customContainer.appendChild(gui.domElement);
+  customContainer.appendChild(DAT_GUI.domElement);
 
   // PREDEFINED OBJECTS
   var objs = { Objects: "Cube" };
-  var objectTypes = gui.add(objs, 'Objects',
+  var objectTypes = DAT_GUI.add(objs, 'Objects',
                             [ "Cube", "Teapot", "Sphere", "Cylinder", "File" ]).listen();
 
   objectTypes.onChange(function(value){ handleObjectType(value) });
 
+  DAT_GUI.add({X: '0.0'}, 'X');
+  DAT_GUI.add({Y: '0.0'}, 'Y');
+  DAT_GUI.add({Z: '0.0'}, 'Z');
+
+  DAT_GUI.__controllers[1].domElement.style.pointerEvents = "none";
+  DAT_GUI.__controllers[2].domElement.style.pointerEvents = "none";
+  DAT_GUI.__controllers[3].domElement.style.pointerEvents = "none";
+
+  // ADJUST THE SCENE
+  adjustScene(GEOMETRY.boundingBox);
+
   // TRANSFORMATIONS FOLDER
-  loadGuiTransfms(gui);
+  loadGuiTransfms();
 
   // RESET TRANSFORMATIONS
   var resetData = {
     reset: function(){ resetTransfms() }
   };
-  gui.add(resetData, 'reset').name("Reset Object");
+  DAT_GUI.add(resetData, 'reset').name("Reset Object");
 
   window.addEventListener('resize', onWindowResize, false);
   document.addEventListener('mousemove', onDocumentMouseMove, false);
@@ -158,13 +163,16 @@ function updateRayCaster(){
     _3D_GRID.xRayLine.visible = true;
     _3D_GRID.yRayLine.visible = true;
     _3D_GRID.zRayLine.visible = true;
+
+    DAT_GUI.__controllers[1].setValue(intersect_pt.x.toString());
+    DAT_GUI.__controllers[2].setValue(intersect_pt.y.toString());
+    DAT_GUI.__controllers[3].setValue(intersect_pt.z.toString());
   }
   else{
     _3D_GRID.xRayLine.visible = false;
     _3D_GRID.yRayLine.visible = false;
     _3D_GRID.zRayLine.visible = false;
   }
-
 }
 
 
@@ -201,7 +209,7 @@ function readByFileType(){
 
         GEOMETRY.boundingBox = new THREE.Box3();
         GEOMETRY.boundingBox.setFromObject(GEOMETRY);
-        checkGeometryBoundBox(GEOMETRY.boundingBox);
+        adjustCoordSys(GEOMETRY.boundingBox);
 
         var material = new THREE.MeshStandardMaterial();
         MESH = new THREE.Mesh(GEOMETRY, material);
@@ -213,7 +221,7 @@ function readByFileType(){
         INTERSECT_OBJS.push(GEOMETRY);
         SCENE.add(GEOMETRY);
 
-        adjustObjAndCam();
+        adjustScene(GEOMETRY.boundingBox);
         removeLoadScreen();
       });
       reader.readAsText(fileInput.files[0]);
@@ -235,7 +243,7 @@ function readByFileType(){
 
         GEOMETRY.boundingBox = new THREE.Box3();
         GEOMETRY.boundingBox.setFromObject(GEOMETRY);
-        checkGeometryBoundBox(GEOMETRY.boundingBox);
+        adjustCoordSys(GEOMETRY.boundingBox);
 
         var material = new THREE.MeshStandardMaterial();
         MESH = new THREE.Mesh(geometry, material);
@@ -248,7 +256,7 @@ function readByFileType(){
         INTERSECT_OBJS.push(MESH);
         SCENE.add(MESH);
 
-        adjustObjAndCam();
+        adjustScene(GEOMETRY.boundingBox);
         removeLoadScreen();
       }, false);
 
@@ -306,10 +314,6 @@ function readByFileType(){
            GEOMETRY.sourceType = "zip";
            GEOMETRY.sourceObjFile = objFile;
 
-           GEOMETRY.boundingBox = new THREE.Box3();
-           GEOMETRY.boundingBox.setFromObject(GEOMETRY);
-           checkGeometryBoundBox(GEOMETRY.boundingBox);
-
            MESH = new THREE.Mesh(GEOMETRY, materials);
 
            objFile = objFile.replace(/[^\w\s]/g, '');
@@ -319,7 +323,12 @@ function readByFileType(){
            INTERSECT_OBJS.push(GEOMETRY);
            SCENE.add(GEOMETRY);
 
-           adjustObjAndCam();
+           GEOMETRY.boundingBox = new THREE.Box3();
+           GEOMETRY.boundingBox.setFromObject(GEOMETRY);
+
+           adjustCoordSys(GEOMETRY.boundingBox);
+           adjustScene(GEOMETRY.boundingBox);
+
            setTimeout(removeLoadScreen, 1500);
          });
       });
@@ -334,23 +343,7 @@ function readByFileType(){
 }
 
 /**
-* Adjusts the current GEOMETRY and its mesh and resets the CONTROLS and CAMERA.
-*
-* @param {THREE.BufferGeometry}
-* @param {THREE.Mesh}
-*/
-function adjustObjAndCam(){
-  CONTROLS.reset();
-  GEOMETRY.position.x = 0;
-  GEOMETRY.position.y = 0;
-  GEOMETRY.position.z = 0;
-  CAMERA.position.x = 5;
-  CAMERA.position.y = 5;
-  CAMERA.position.z = 5;
-}
-
-/**
-* Checks the type of the current "GEOMETRY" being displayed and removes it from the SCENE.
+* Checks the type of the current object being displayed and removes it from the SCENE.
 */
 function removeCurrentObject(){
   var selectedObject;
@@ -395,9 +388,10 @@ function removeLoadScreen(){
 *
 * @param {dat.GUI}
 */
-function loadGuiTransfms(gui){
+function loadGuiTransfms(){
   // TRANSLATE
-  var translateFldr = gui.addFolder('Translate');
+  var transmFldr =  DAT_GUI.addFolder('Transformation');
+  var translateFldr = transmFldr.addFolder('Translate');
   var translateData = function(){
     this.x = 0;
     this.y = 0;
@@ -412,7 +406,7 @@ function loadGuiTransfms(gui){
   zTrans.onFinishChange(function(value){ handleTransfm(value, 'translate', 'z'); });
 
   // SCALE
-  var scaleFldr = gui.addFolder('Scale');
+  var scaleFldr = transmFldr.addFolder('Scale');
   var scaleData = function(){
     this.x = 0;
     this.y = 0;
@@ -427,7 +421,7 @@ function loadGuiTransfms(gui){
   zScale.onFinishChange(function(value){ handleTransfm(value, 'scale', 'z'); });
 
   // SHEAR
-  var shearFldr = gui.addFolder('Shear');
+  var shearFldr = transmFldr.addFolder('Shear');
   var shearData = function(){
     this.x = 0;
     this.y = 0;
@@ -442,7 +436,7 @@ function loadGuiTransfms(gui){
   zShear.onFinishChange(function(value){ handleTransfm(value, 'shear', 'z'); });
 
   // ROTATION
-  var rotatFldr = gui.addFolder('Rotation');
+  var rotatFldr = transmFldr.addFolder('Rotation');
   var rotatData = function(){
     this.x = 0;
     this.y = 0;
@@ -469,11 +463,8 @@ function resetTransfms(){
   }
   MESH.geometry.applyMatrix(resMat);
   MESH.geometry.verticesNeedUpdate = true;
-  CONTROLS.reset();
-  CAMERA.position.x = 5;
-  CAMERA.position.y = 5;
-  CAMERA.position.z = 5;
 
+  adjustScene(GEOMETRY.boundingBox);
   TRANSFM_ARR = [];
 }
 
@@ -515,7 +506,6 @@ function handleTransfm(num, transformType, dir){
            break;
 
          default:
-           console.log("?_? ._.");
            break;
        }
        TRANSFM_ARR.push(transMat);
@@ -542,7 +532,6 @@ function handleTransfm(num, transformType, dir){
            break;
 
          default:
-           console.log("?_? ._.");
            break;
        }
        TRANSFM_ARR.push(scaleMat);
@@ -573,7 +562,6 @@ function handleTransfm(num, transformType, dir){
              break;
 
            default:
-             console.log("?_? ._.");
              break;
          }
          TRANSFM_ARR.push(shearMat);
@@ -602,7 +590,6 @@ function handleTransfm(num, transformType, dir){
            break;
 
          default:
-           console.log("?_? ._.");
            break;
        }
        TRANSFM_ARR.push(rotMat);
@@ -611,7 +598,6 @@ function handleTransfm(num, transformType, dir){
        break;
 
      default:
-       console.log("?_?");
        break;
    }
  }
@@ -624,6 +610,7 @@ function handleTransfm(num, transformType, dir){
 * @param {string} - The GEOMETRY type to display.
 */
 function handleObjectType(objType){
+
   switch(objType){
     case 'Cube':
     case 'Teapot':
@@ -649,9 +636,15 @@ function handleObjectType(objType){
           MESH = MAT3D_CYLINDER.mesh;
           break;
       }
+
+      if(_3D_GRID.origin.x != 0 && _3D_GRID.origin.y != 0 &&
+         _3D_GRID.origin.z != 0)
+        adjustCoordSys(GEOMETRY.boundingBox);
+
+      adjustScene(GEOMETRY.boundingBox);
+
       INTERSECT_OBJS.push(MESH);
       SCENE.add(MESH);
-      CONTROLS.reset();
       break;
 
     case 'File':
@@ -663,34 +656,126 @@ function handleObjectType(objType){
       }, false);
       break;
 
-    default: break;
+    default:
+      break;
   }
-
-  CAMERA.position.x = 5;
-  CAMERA.position.y = 5;
-  CAMERA.position.z = 5;
 }
 
-function checkGeometryBoundBox(boundingBox){
-  // check object dimensions and readjust coordinate system (if need be)
+/**
+* Checks geometry dimensions and adjusts the coordinate system (if need be)
+*
+* @param {THREE.Box3} - The bounding box
+*/
+function adjustCoordSys(boundingBox, centered){
   var xOrigin = _3D_GRID.origin.x;
   var yOrigin = _3D_GRID.origin.y;
   var zOrigin = _3D_GRID.origin.z;
 
+  // check if bounding box goes beyond the current origin
   if(boundingBox.min.x != _3D_GRID.origin.x)
     xOrigin = boundingBox.min.x;
   if(boundingBox.min.y != _3D_GRID.origin.y)
     yOrigin = boundingBox.min.y;
-  if(boundingBox.min.y != _3D_GRID.origin.y)
-    zOrigin = boundingBox.min.x;
+  if(boundingBox.min.z != _3D_GRID.origin.z)
+    zOrigin = boundingBox.min.z;
 
-  if(xOrigin !== _3D_GRID.origin.x ||
-     yOrigin !== _3D_GRID.origin.y ||
-     zOrigin !== _3D_GRID.origin.z){
-       
-    _3D_GRID.setOrigin({ x: xOrigin,
-                         y: yOrigin,
-                         z: zOrigin
-                      });
+  /**
+   * Check if after moving origin, bounding box goes beyond a coordinate grid
+   * or is way smaller than a grid
+   */
+  var scale;
+  var step = _3D_GRID.step;
+  var stepSubDivisions = _3D_GRID.stepSubDivisions;
+  if((boundingBox.max.x > ((xOrigin + _3D_GRID.xzWidth) ||
+                           (xOrigin + _3D_GRID.xzLength))) ||
+     (boundingBox.max.y > ((yOrigin + _3D_GRID.xyWidth) ||
+                           (yOrigin + _3D_GRID.xyLength))) ||
+     (boundingBox.max.z > ((zOrigin + _3D_GRID.yzWidth) ||
+                           (zOrigin + _3D_GRID.yzLength))) ||
+     (Math.abs(boundingBox.max.x) + Math.abs(boundingBox.min.x)) < _3D_GRID.step/5 ||
+     (Math.abs(boundingBox.max.y) + Math.abs(boundingBox.min.y)) < _3D_GRID.step/5 ||
+     (Math.abs(boundingBox.max.z) + Math.abs(boundingBox.min.z)) < _3D_GRID.step/5){
+    var max = Math.max(boundingBox.max.x, boundingBox.max.y, boundingBox.max.z);
+    var amt = Math.ceil(max * 3);
+    if(amt > 5){
+      scale = amt;
+      step = amt;
+      stepSubDivisions = Math.ceil(amt / max);
+    }
+    else{
+      xOrigin = 0;
+      yOrigin = 0;
+      zOrigin = 0;
+      scale = 5;
+      step = 5;
+      stepSubDivisions = 5;
+    }
   }
+
+  if(xOrigin != _3D_GRID.origin.x ||
+     yOrigin != _3D_GRID.origin.y ||
+     zOrigin != _3D_GRID.origin.z){
+
+    if(scale !== undefined){
+      _3D_GRID.setOriginAndResizeAll({
+        origin:{
+          x: xOrigin - (scale/2) + ((Math.abs(boundingBox.max.x) +
+                                     Math.abs(boundingBox.min.x))/2),
+          y: yOrigin,
+          z: zOrigin - (scale/2) + ((Math.abs(boundingBox.max.z) +
+                                     Math.abs(boundingBox.min.z))/2)
+        },
+        xzWidth: scale,
+        xyWidth: scale,
+        yzWidth: scale,
+        xzLength: scale,
+        xyLength: scale,
+        yzLength: scale,
+        step: step,
+        stepSubDivisions: stepSubDivisions
+      });
+    }
+    else{
+      _3D_GRID.setOrigin({
+        x: xOrigin,
+        y: yOrigin,
+        z: zOrigin
+      });
+    }
+  }
+  else if(scale !== undefined){
+    _3D_GRID.setOriginAndResizeAll({
+      origin:{
+        x: _3D_GRID.origin.x,
+        y: _3D_GRID.origin.y,
+        z: _3D_GRID.origin.z
+      },
+      xzWidth: scale,
+      xyWidth: scale,
+      yzWidth: scale,
+      xzLength: scale,
+      xyLength: scale,
+      yzLength: scale,
+      step: step,
+      stepSubDivisions: stepSubDivisions
+    });
+  }
+}
+
+/**
+* Adjusts the CAMERA and resets the CONTROLS and gui coordinates.
+*
+* @param {THREE.Box3}
+*/
+function adjustScene(boundingBox){
+  CONTROLS.reset();
+  DAT_GUI.__controllers[1].setValue('0.0');
+  DAT_GUI.__controllers[2].setValue('0.0');
+  DAT_GUI.__controllers[3].setValue('0.0');
+
+  var max = Math.max(boundingBox.max.x, boundingBox.max.y, boundingBox.max.z);
+  var amt = Math.ceil(max * 3);
+  CAMERA.position.x = amt;
+  CAMERA.position.y = amt;
+  CAMERA.position.z = amt;
 }
