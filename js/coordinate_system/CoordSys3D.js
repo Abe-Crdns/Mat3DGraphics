@@ -23,7 +23,6 @@ var CoordSys3D = function(_THREE$Object3D){
     var xyLength = (args !== undefined && args.xyLength !== undefined) ? args.xyLength : 5;
     var yzLength = (args !== undefined && args.yzLength !== undefined) ? args.yzLength : 5;
 
-
     var origin = (args !== undefined && args.origin !== undefined && args.origin.x !== undefined &&
       args.origin.y !== undefined && args.origin.z !== undefined) ? args.origin : {x: 0, y: 0, z: 0};
 
@@ -44,7 +43,7 @@ var CoordSys3D = function(_THREE$Object3D){
     var zAxisOpacity = (args !== undefined && args.zAxisOpacity !== undefined) ? args.zAxisOpacity : 1;
 
     var step = (args !== undefined && args.step !== undefined) ? args.step : 5;
-    var stepSubDivisions = (args !== undefined && args.stepSubDivisions !== undefined) ? args.stepSubDivisions : 5;
+    var stepSubDivisions = (args !== undefined && args.stepSubDivisions !== undefined) ? args.stepSubDivisions : 10;
 
     var text = (args !== undefined && args.text !== undefined) ? args.text : true;
     var textColor = (args !== undefined && args.textColor !== undefined) ? args.textColor : "#000000";

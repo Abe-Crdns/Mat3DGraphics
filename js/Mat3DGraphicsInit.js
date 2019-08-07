@@ -50,7 +50,7 @@ function init(){
   SCENE.add(MESH);
 
   // DEFAULT COORDINATE SYSTEM (includes axis and raylines)
-  _3D_GRID = new CoordSys3D({origin: {x: -2, y: 0, z: -2}});
+  _3D_GRID = new CoordSys3D({origin: {x: -2.5, y: -0.5, z: -2.5}});
   _3D_GRID.name = "My3DGrid";
   SCENE.add(_3D_GRID);
 
@@ -139,26 +139,26 @@ function updateRayCaster(){
     var yRayLineGeo = _3D_GRID.yRayLine.geometry;
     var zRayLineGeo = _3D_GRID.zRayLine.geometry;
 
-    var xOriginAbs = _3D_GRID.origin.x;
-    var yOriginAbs = _3D_GRID.origin.y;
-    var zOriginAbs = _3D_GRID.origin.z;
+    var xOrigin = _3D_GRID.origin.x;
+    var yOrigin = _3D_GRID.origin.y;
+    var zOrigin = _3D_GRID.origin.z;
 
-    xRayLineGeo.setPositions([ xOriginAbs, intersect_pt.y, intersect_pt.z,
+    xRayLineGeo.setPositions([ xOrigin, intersect_pt.y, intersect_pt.z,
                                intersect_pt.x, intersect_pt.y, intersect_pt.z ]);
 
-    yRayLineGeo.setPositions([ intersect_pt.x, yOriginAbs, intersect_pt.z,
+    yRayLineGeo.setPositions([ intersect_pt.x, yOrigin, intersect_pt.z,
                                intersect_pt.x, intersect_pt.y, intersect_pt.z ]);
 
-    zRayLineGeo.setPositions([ intersect_pt.x, intersect_pt.y, zOriginAbs,
+    zRayLineGeo.setPositions([ intersect_pt.x, intersect_pt.y, zOrigin,
                                intersect_pt.x, intersect_pt.y, intersect_pt.z ]);
 
     _3D_GRID.xRayLine.computeLineDistances();
     _3D_GRID.yRayLine.computeLineDistances();
     _3D_GRID.zRayLine.computeLineDistances();
 
-    _3D_GRID.xRayLine.scale.set( 1, 1, 1 );
-    _3D_GRID.yRayLine.scale.set( 1, 1, 1 );
-    _3D_GRID.zRayLine.scale.set( 1, 1, 1 );
+    _3D_GRID.xRayLine.scale.set(1, 1, 1);
+    _3D_GRID.yRayLine.scale.set(1, 1, 1);
+    _3D_GRID.zRayLine.scale.set(1, 1, 1);
 
     _3D_GRID.xRayLine.visible = true;
     _3D_GRID.yRayLine.visible = true;
@@ -696,25 +696,19 @@ function adjustCoordSys(boundingBox, centered){
                            (yOrigin + _3D_GRID.xyLength))) ||
      (boundingBox.max.z > ((zOrigin + _3D_GRID.yzWidth) ||
                            (zOrigin + _3D_GRID.yzLength))) ||
-     (Math.abs(boundingBox.max.x) + Math.abs(boundingBox.min.x)) < _3D_GRID.step/5 ||
-     (Math.abs(boundingBox.max.y) + Math.abs(boundingBox.min.y)) < _3D_GRID.step/5 ||
-     (Math.abs(boundingBox.max.z) + Math.abs(boundingBox.min.z)) < _3D_GRID.step/5){
+     (Math.abs(boundingBox.max.x) + Math.abs(boundingBox.min.x)) <= _3D_GRID.step/5 ||
+     (Math.abs(boundingBox.max.y) + Math.abs(boundingBox.min.y)) <= _3D_GRID.step/5 ||
+     (Math.abs(boundingBox.max.z) + Math.abs(boundingBox.min.z)) <= _3D_GRID.step/5){
+
     var max = Math.max(boundingBox.max.x, boundingBox.max.y, boundingBox.max.z);
-    var amt = Math.ceil(max * 3);
-    if(amt > 5){
-      scale = amt;
-      step = amt;
-      stepSubDivisions = Math.ceil(amt / max);
-    }
-    else{
-      xOrigin = 0;
-      yOrigin = 0;
-      zOrigin = 0;
-      scale = 5;
-      step = 5;
-      stepSubDivisions = 5;
-    }
+    var min = Math.min(boundingBox.min.x, boundingBox.min.y, boundingBox.min.z);
+    var scale_amt = Math.abs((max + Math.abs(min)) * 5);
+
+    scale = scale_amt;
+    step = scale_amt;
+    stepSubDivisions = Math.floor((2 * scale_amt) / (max + Math.abs(min)));
   }
+
 
   if(xOrigin != _3D_GRID.origin.x ||
      yOrigin != _3D_GRID.origin.y ||
@@ -778,7 +772,9 @@ function adjustScene(boundingBox){
   DAT_GUI.__controllers[3].setValue('0.0');
 
   var max = Math.max(boundingBox.max.x, boundingBox.max.y, boundingBox.max.z);
-  var amt = Math.ceil(max * 3);
+  var min = Math.min(boundingBox.min.x, boundingBox.min.y, boundingBox.min.z);
+
+  var amt = (max + Math.abs(min)) * 2;
   CAMERA.position.x = amt;
   CAMERA.position.y = amt;
   CAMERA.position.z = amt;

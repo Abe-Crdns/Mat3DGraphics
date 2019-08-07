@@ -23,10 +23,6 @@ const MAT3D_CUBE = function(){
   var cube_mesh = new THREE.Mesh(cube_geo, material);
   cube_mesh.name = "cube1mesh";
 
-  cube_mesh.position.x = 0.5;
-  cube_mesh.position.y = 0.5;
-  cube_mesh.position.z = 0.5;
-
   return { geometry: cube_geo, mesh: cube_mesh };
 }();
 
@@ -41,10 +37,6 @@ const MAT3D_TEAPOT = function(){
                                                          transparent: true });
   var teapot_mesh = new THREE.Mesh(teapot_geo, teapot_material);
   teapot_mesh.name = "teapot1mesh";
-
-  teapot_mesh.position.x = Math.abs(teapot_mesh.geometry.boundingBox.min.x);
-  teapot_mesh.position.y = Math.abs(teapot_mesh.geometry.boundingBox.min.y);
-  teapot_mesh.position.z = Math.abs(teapot_mesh.geometry.boundingBox.min.z);
 
   return { geometry: teapot_geo, mesh: teapot_mesh };
 }();
@@ -79,10 +71,6 @@ const MAT3D_SPHERE = function(){
   var sphere_mesh = new THREE.Mesh(sphere_geo, material);
   sphere_mesh.name = "sphere1mesh";
 
-  sphere_mesh.position.x = 0.5;
-  sphere_mesh.position.y = 0.5;
-  sphere_mesh.position.z = 0.5;
-
   return { geometry: sphere_geo, mesh: sphere_mesh };
 }();
 
@@ -102,10 +90,6 @@ const MAT3D_CYLINDER = function(){
                                                   transparent: true });
   var cylinder_mesh = new THREE.Mesh(cylinder_geo, material);
   cylinder_mesh.name = "cylinder1mesh";
-
-  cylinder_mesh.position.x = 0.5;
-  cylinder_mesh.position.y = 0.5;
-  cylinder_mesh.position.z = 0.5;
 
   return { geometry: cylinder_geo, mesh: cylinder_mesh };
 }();
