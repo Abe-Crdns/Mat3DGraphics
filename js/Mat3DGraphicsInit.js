@@ -6,6 +6,9 @@
 
 import { CoordSys3D } from './coordinate_system/CoordSys3D.js'
 
+const GRIDS_SCALE = 2.5;
+const GRIDS_SUB_DIV = 10;
+
 // global program variables
 var RENDERER, SCENE, CAMERA, CONTROLS;
 var RAYCASTER, GEOMETRY, MESH, _3D_GRID;
@@ -65,6 +68,7 @@ function init(){
 
   objectTypes.onChange(function(value){ handleObjectType(value) });
 
+  // Coordinates displayed for the raycaster
   DAT_GUI.add({X: '0.0'}, 'X');
   DAT_GUI.add({Y: '0.0'}, 'Y');
   DAT_GUI.add({Z: '0.0'}, 'Z');
@@ -480,132 +484,138 @@ function resetTransfms(){
 * @param {string} - Specifies which direction to apply the transformation.
 */
 function handleTransfm(num, transformType, dir){
+  var transMat, scaleMat,
+      shearMat, rotMat;
 
- if(num == 0){
-   return;
- }
- else if((transformType == 'translate' || transformType == 'scale' || transformType == 'shear') && num > 250){
-   console.log("Error, can not apply a " + transformType + " transformation larger than 250 units.");
-   return;
- }
- else{
-   var strNum = num.toString();
-   switch(transformType){
-     case 'translate':
-       var transMat;
-       switch(dir){
-         case 'x':
-           transMat = new THREE.Matrix4().makeTranslation(num, 0, 0);
-           console.log("Translated in the x direction by " + strNum + " units.");
-           break;
+  var strNum = num.toString();
 
-         case 'y':
-           transMat = new THREE.Matrix4().makeTranslation(0, num, 0);
-           console.log("Translated in the y direction by " + strNum + " units.");
-           break;
+  switch(transformType){
+    case 'translate':
+      switch(dir){
+        case 'x':
+          transMat = new THREE.Matrix4().makeTranslation(num, 0, 0);
+          console.log("Translated in the x direction by " + strNum + " units.");
+          break;
 
-         case 'z':
-           transMat = new THREE.Matrix4().makeTranslation(0, 0, num);
-           console.log("Translated in the z direction by " + strNum + " units.");
-           break;
+        case 'y':
+          transMat = new THREE.Matrix4().makeTranslation(0, num, 0);
+          console.log("Translated in the y direction by " + strNum + " units.");
+          break;
 
-         default:
-           break;
-       }
-       TRANSFM_ARR.push(transMat);
-       MESH.geometry.applyMatrix(transMat);
-       MESH.geometry.verticesNeedUpdate = true;
-       break;
+        case 'z':
+          transMat = new THREE.Matrix4().makeTranslation(0, 0, num);
+          console.log("Translated in the z direction by " + strNum + " units.");
+          break;
 
-     case 'scale':
-       var scaleMat;
-       switch(dir){
-         case 'x':
-           scaleMat = new THREE.Matrix4().makeScale(num, 1, 1);
-           console.log("Scaled in the x direction by " + strNum + " units.");
-           break;
+        default:
+          break;
+      }
+      if(transMat !== undefined){
+        TRANSFM_ARR.push(transMat);
+        MESH.geometry.applyMatrix(transMat);
+        MESH.geometry.verticesNeedUpdate = true;
+      }
+      break;
 
-         case 'y':
-           scaleMat = new THREE.Matrix4().makeScale(1, num, 1);
-           console.log("Scaled in the y direction by " + strNum + " units.");
-           break;
+    case 'scale':
+      switch(dir){
+        case 'x':
+          scaleMat = new THREE.Matrix4().makeScale(num, 1, 1);
+          console.log("Scaled in the x direction by " + strNum + " units.");
+          break;
 
-         case 'z':
-           scaleMat = new THREE.Matrix4().makeScale(1, 1, num);
-           console.log("Scaled in the z direction by " + strNum + " units.");
-           break;
+        case 'y':
+          scaleMat = new THREE.Matrix4().makeScale(1, num, 1);
+          console.log("Scaled in the y direction by " + strNum + " units.");
+          break;
 
-         default:
-           break;
-       }
-       TRANSFM_ARR.push(scaleMat);
-       MESH.geometry.applyMatrix(scaleMat);
-       MESH.geometry.verticesNeedUpdate = true;
-       break;
+        case 'z':
+          scaleMat = new THREE.Matrix4().makeScale(1, 1, num);
+          console.log("Scaled in the z direction by " + strNum + " units.");
+          break;
 
-     case 'shear':
-       var shearMat;
-       if(fileInput.files[0] != null){
-         console.log("Due to a bug, shear is disabled in file mode, sorry!");
-       }
-       else{
-         switch(dir){
-           case 'x':
-             shearMat = new THREE.Matrix4().makeShear(num, 0, 0);
-             console.log("Sheared in the x direction by " + strNum + " units.");
-             break;
+        default:
+          break;
+      }
+      if(scaleMat !== undefined){
+        TRANSFM_ARR.push(scaleMat);
+        MESH.geometry.applyMatrix(scaleMat);
+        MESH.geometry.verticesNeedUpdate = true;
+      }
+      break;
 
-           case 'y':
-             shearMat = new THREE.Matrix4().makeShear(0, num, 0);
-             console.log("Sheared in the y direction by " + strNum + " units.");
-             break;
+    case 'shear':
+      if(fileInput.files[0] != null){
+        console.log("Due to a bug, shear is disabled in file mode, sorry!");
+      }
+      else{
+        switch(dir){
+          case 'x':
+          shearMat = new THREE.Matrix4().makeShear(num, 0, 0);
+          console.log("Sheared in the x direction by " + strNum + " units.");
+          break;
 
-           case 'z':
-             shearMat = new THREE.Matrix4().makeShear(0, 0, num);
-             console.log("Sheared in the z direction by " + strNum + " units.");
-             break;
+          case 'y':
+          shearMat = new THREE.Matrix4().makeShear(0, num, 0);
+          console.log("Sheared in the y direction by " + strNum + " units.");
+          break;
 
-           default:
-             break;
-         }
-         TRANSFM_ARR.push(shearMat);
-         MESH.geometry.applyMatrix(shearMat);
-         MESH.geometry.verticesNeedUpdate = true;
-       }
-       break;
+          case 'z':
+          shearMat = new THREE.Matrix4().makeShear(0, 0, num);
+          console.log("Sheared in the z direction by " + strNum + " units.");
+          break;
 
-     case 'rotation':
-       var rotMat;
-       var rad = num * (Math.PI/180);
-       switch(dir){
-         case 'x':
-           rotMat = new THREE.Matrix4().makeRotationX(rad);
-           console.log("Rotated in the x direction by " + strNum + " degrees.");
-           break;
+          default:
+          break;
+        }
+        if(shearMat !== undefined){
+          TRANSFM_ARR.push(shearMat);
+          MESH.geometry.applyMatrix(shearMat);
+          MESH.geometry.verticesNeedUpdate = true;
+        }
+      }
+      break;
 
-         case 'y':
-           rotMat = new THREE.Matrix4().makeRotationY(rad);
-           console.log("Rotated in the y direction by " + strNum + " degrees.");
-           break;
+    case 'rotation':
+      var rad = num * (Math.PI/180);
+      switch(dir){
+        case 'x':
+          rotMat = new THREE.Matrix4().makeRotationX(rad);
+          console.log("Rotated in the x direction by " + strNum + " degrees.");
+          break;
 
-         case 'z':
-           rotMat = new THREE.Matrix4().makeRotationZ(rad);
-           console.log("Rotated in the z direction by " + strNum + " degrees.");
-           break;
+        case 'y':
+          rotMat = new THREE.Matrix4().makeRotationY(rad);
+          console.log("Rotated in the y direction by " + strNum + " degrees.");
+          break;
 
-         default:
-           break;
-       }
-       TRANSFM_ARR.push(rotMat);
-       MESH.geometry.applyMatrix(rotMat);
-       MESH.geometry.verticesNeedUpdate = true;
-       break;
+        case 'z':
+          rotMat = new THREE.Matrix4().makeRotationZ(rad);
+          console.log("Rotated in the z direction by " + strNum + " degrees.");
+          break;
 
-     default:
-       break;
-   }
- }
+        default:
+          break;
+      }
+      if(rotMat !== undefined){
+        TRANSFM_ARR.push(rotMat);
+        MESH.geometry.applyMatrix(rotMat);
+        MESH.geometry.verticesNeedUpdate = true;
+      }
+      break;
 
+    default:
+      break;
+  }
+
+  GEOMETRY.boundingBox = new THREE.Box3();
+  GEOMETRY.boundingBox.setFromObject(MESH);
+
+  if(transMat !== undefined || scaleMat !== undefined ||
+     shearMat !== undefined || rotMat !== undefined){
+    adjustCoordSys(GEOMETRY.boundingBox);
+    adjustScene(GEOMETRY.boundingBox);
+  }
 }
 
 /**
@@ -614,7 +624,6 @@ function handleTransfm(num, transformType, dir){
 * @param {string} - The GEOMETRY type to display.
 */
 function handleObjectType(objType){
-
   switch(objType){
     case 'Cube':
     case 'Teapot':
@@ -640,11 +649,7 @@ function handleObjectType(objType){
           MESH = MAT3D_CYLINDER.mesh;
           break;
       }
-
-      if(_3D_GRID.origin.x != 0 && _3D_GRID.origin.y != 0 &&
-         _3D_GRID.origin.z != 0)
-        adjustCoordSys(GEOMETRY.boundingBox);
-
+      adjustCoordSys(GEOMETRY.boundingBox);
       adjustScene(GEOMETRY.boundingBox);
 
       INTERSECT_OBJS.push(MESH);
@@ -670,58 +675,94 @@ function handleObjectType(objType){
 *
 * @param {THREE.Box3} - The bounding box
 */
-function adjustCoordSys(boundingBox, centered){
-  var xOrigin = _3D_GRID.origin.x;
-  var yOrigin = _3D_GRID.origin.y;
-  var zOrigin = _3D_GRID.origin.z;
+function adjustCoordSys(boundingBox){
+  var xAxisMax = _3D_GRID.xAxis.geometry.boundingBox.max.x;
+  var xAxisMin = _3D_GRID.xAxis.geometry.boundingBox.min.x;
 
-  // check if bounding box goes beyond the current origin
-  if(boundingBox.min.x != _3D_GRID.origin.x)
-    xOrigin = boundingBox.min.x;
-  if(boundingBox.min.y != _3D_GRID.origin.y)
-    yOrigin = boundingBox.min.y;
-  if(boundingBox.min.z != _3D_GRID.origin.z)
-    zOrigin = boundingBox.min.z;
+  var yAxisMax = _3D_GRID.yAxis.geometry.boundingBox.max.y;
+  var yAxisMin = _3D_GRID.yAxis.geometry.boundingBox.min.y;
 
-  /**
-   * Check if after moving origin, bounding box goes beyond a coordinate grid
-   * or is way smaller than a grid
-   */
-  var scale;
-  var step = _3D_GRID.step;
-  var stepSubDivisions = _3D_GRID.stepSubDivisions;
-  if((boundingBox.max.x > ((xOrigin + _3D_GRID.xzWidth) ||
-                           (xOrigin + _3D_GRID.xzLength))) ||
-     (boundingBox.max.y > ((yOrigin + _3D_GRID.xyWidth) ||
-                           (yOrigin + _3D_GRID.xyLength))) ||
-     (boundingBox.max.z > ((zOrigin + _3D_GRID.yzWidth) ||
-                           (zOrigin + _3D_GRID.yzLength))) ||
-     (Math.abs(boundingBox.max.x) + Math.abs(boundingBox.min.x)) <= _3D_GRID.step/5 ||
-     (Math.abs(boundingBox.max.y) + Math.abs(boundingBox.min.y)) <= _3D_GRID.step/5 ||
-     (Math.abs(boundingBox.max.z) + Math.abs(boundingBox.min.z)) <= _3D_GRID.step/5){
+  var zAxisMax = _3D_GRID.zAxis.geometry.boundingBox.max.z;
+  var zAxisMin = _3D_GRID.zAxis.geometry.boundingBox.min.z;
 
-    var max = Math.max(boundingBox.max.x, boundingBox.max.y, boundingBox.max.z);
-    var min = Math.min(boundingBox.min.x, boundingBox.min.y, boundingBox.min.z);
-    var scale_amt = Math.abs((max + Math.abs(min)) * 5);
+  if( boundingBox.max.x > xAxisMax || boundingBox.min.x < xAxisMin ||
+      boundingBox.max.y > yAxisMax || boundingBox.min.y < yAxisMin ||
+      boundingBox.max.z > zAxisMax || boundingBox.min.z < zAxisMin ){
 
-    scale = scale_amt;
-    step = scale_amt;
-    stepSubDivisions = Math.floor((2 * scale_amt) / (max + Math.abs(min)));
-  }
+    var xOrigin = _3D_GRID.origin.x;
+    var yOrigin = _3D_GRID.origin.y;
+    var zOrigin = _3D_GRID.origin.z;
 
+    // check if min bounding box is not the current origin
+    if( boundingBox.min.x != _3D_GRID.origin.x ||
+        boundingBox.min.y != _3D_GRID.origin.y ||
+        boundingBox.min.z != _3D_GRID.origin.z ){
+      xOrigin = boundingBox.min.x;
+      yOrigin = boundingBox.min.y;
+      zOrigin = boundingBox.min.z;
+    }
 
-  if(xOrigin != _3D_GRID.origin.x ||
-     yOrigin != _3D_GRID.origin.y ||
-     zOrigin != _3D_GRID.origin.z){
+    /**
+     * Check if after moving origin, bounding box goes beyond a coordinate grid
+     * or bound box is smaller than gridsSubStepSize
+     */
+    var scale;
+    var step = _3D_GRID.step;
+    var stepSubDivisions = _3D_GRID.stepSubDivisions;
+    var gridsSubStepSize = _3D_GRID.step/GRIDS_SUB_DIV;
 
-    if(scale !== undefined){
+    if( boundingBox.max.x > xOrigin + _3D_GRID.xzLength ||
+        boundingBox.max.y > yOrigin + _3D_GRID.xyLength ||
+        boundingBox.max.z > zOrigin + _3D_GRID.yzLength ||
+        (Math.abs(boundingBox.max.x) + Math.abs(boundingBox.min.x)) < gridsSubStepSize ||
+        (Math.abs(boundingBox.max.y) + Math.abs(boundingBox.min.y)) < gridsSubStepSize ||
+        (Math.abs(boundingBox.max.z) + Math.abs(boundingBox.min.z)) < gridsSubStepSize ){
+
+      var max = Math.max(boundingBox.max.x, boundingBox.max.y, boundingBox.max.z);
+      var min = Math.min(boundingBox.min.x, boundingBox.min.y, boundingBox.min.z);
+      var scale_amt = (Math.abs(max) + Math.abs(min)) * GRIDS_SCALE;
+
+      scale = scale_amt;
+      step = scale_amt;
+      stepSubDivisions = GRIDS_SUB_DIV;
+    }
+
+    if(xOrigin != _3D_GRID.origin.x || yOrigin != _3D_GRID.origin.y ||
+       zOrigin != _3D_GRID.origin.z){
+
+      if(scale !== undefined){
+        _3D_GRID.setOriginAndResizeAll({
+          origin:{
+            x: xOrigin - (scale/2) + ((Math.abs(boundingBox.max.x) +
+                                       Math.abs(boundingBox.min.x))/2),
+            y: yOrigin,
+            z: zOrigin - (scale/2) + ((Math.abs(boundingBox.max.z) +
+                                       Math.abs(boundingBox.min.z))/2)
+          },
+          xzWidth: scale,
+          xyWidth: scale,
+          yzWidth: scale,
+          xzLength: scale,
+          xyLength: scale,
+          yzLength: scale,
+          step: step,
+          stepSubDivisions: stepSubDivisions
+        });
+      }
+      else{
+        _3D_GRID.setOrigin({
+          x: xOrigin,
+          y: yOrigin,
+          z: zOrigin
+        });
+      }
+    }
+    else if(scale !== undefined){
       _3D_GRID.setOriginAndResizeAll({
         origin:{
-          x: xOrigin - (scale/2) + ((Math.abs(boundingBox.max.x) +
-                                     Math.abs(boundingBox.min.x))/2),
-          y: yOrigin,
-          z: zOrigin - (scale/2) + ((Math.abs(boundingBox.max.z) +
-                                     Math.abs(boundingBox.min.z))/2)
+          x: _3D_GRID.origin.x,
+          y: _3D_GRID.origin.y,
+          z: _3D_GRID.origin.z
         },
         xzWidth: scale,
         xyWidth: scale,
@@ -733,30 +774,6 @@ function adjustCoordSys(boundingBox, centered){
         stepSubDivisions: stepSubDivisions
       });
     }
-    else{
-      _3D_GRID.setOrigin({
-        x: xOrigin,
-        y: yOrigin,
-        z: zOrigin
-      });
-    }
-  }
-  else if(scale !== undefined){
-    _3D_GRID.setOriginAndResizeAll({
-      origin:{
-        x: _3D_GRID.origin.x,
-        y: _3D_GRID.origin.y,
-        z: _3D_GRID.origin.z
-      },
-      xzWidth: scale,
-      xyWidth: scale,
-      yzWidth: scale,
-      xzLength: scale,
-      xyLength: scale,
-      yzLength: scale,
-      step: step,
-      stepSubDivisions: stepSubDivisions
-    });
   }
 }
 
@@ -774,7 +791,7 @@ function adjustScene(boundingBox){
   var max = Math.max(boundingBox.max.x, boundingBox.max.y, boundingBox.max.z);
   var min = Math.min(boundingBox.min.x, boundingBox.min.y, boundingBox.min.z);
 
-  var amt = (max + Math.abs(min)) * 2;
+  var amt = (max + Math.abs(min)) * 3;
   CAMERA.position.x = amt;
   CAMERA.position.y = amt;
   CAMERA.position.z = amt;

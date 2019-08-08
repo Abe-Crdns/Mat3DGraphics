@@ -92,7 +92,11 @@ var CoordSys3D = function(_THREE$Object3D){
 
     _this.name = "";
 
-    _this._draw3DCoordSys({drawXZ: drawXZ, drawXY: drawXY, drawYZ: drawYZ});
+    _this._draw3DCoordSys({
+      drawXZ: drawXZ,
+      drawXY: drawXY,
+      drawYZ: drawYZ
+    });
 
     return _this;
   }
@@ -171,28 +175,69 @@ var CoordSys3D = function(_THREE$Object3D){
 
       if(this.xzWidth == this.xyWidth && this.xzWidth == this.yzWidth && this.xyWidth == this.yzWidth &&
          this.xzLength == this.xyLength && this.xzLength == this.yzLength && this.xyLength == this.yzLength){
-        this.computeGridVertices({ computeXZ: true, computeXY: true, computeYZ: true,
-                                   width: this.xzWidth, length: this.xzLength });
+        this.computeGridVertices({
+          computeXZ: true,
+          computeXY: true,
+          computeYZ: true,
+          width: this.xzWidth,
+          length: this.xzLength
+        });
       }
       else if(this.xzWidth == this.xyWidth && this.xzLength == this.xyLength){
-        this.computeGridVertices({ computeXZ: true, computeXY: true,
-                                   width: this.xzWidth, length: this.xzLength });
-        this.computeGridVertices({ computeYZ: true, width: this.yzWidth, length: this.yzLength });
+        this.computeGridVertices({
+          computeXZ: true,
+          computeXY: true,
+          width: this.xzWidth,
+          length: this.xzLength
+        });
+        this.computeGridVertices({
+          computeYZ: true,
+          width: this.yzWidth,
+          length: this.yzLength
+        });
       }
       else if(this.xzWidth == this.yzWidth && this.xzLength == this.yzLength){
-        this.computeGridVertices({ computeXZ: true, computeYZ: true,
-                                   width: this.xzWidth, length: this.xzLength });
-        this.computeGridVertices({ computeXY: true, width: this.xyWidth, length: this.xyLength });
+        this.computeGridVertices({
+          computeXZ: true,
+          computeYZ: true,
+          width: this.xzWidth,
+          length: this.xzLength
+        });
+        this.computeGridVertices({
+          computeXY: true,
+          width: this.xyWidth,
+          length: this.xyLength
+        });
       }
       else if(this.xyWidth == this.yzWidth && this.xyLength == this.yzLength){
-        this.computeGridVertices({ computeXY: true, computeYZ: true,
-                                   width: this.xyWidth, length: this.xyLength });
-        this.computeGridVertices({ computeXZ: true, width: this.xyWidth, length: this.xyLength });
+        this.computeGridVertices({
+          computeXY: true,
+          computeYZ: true,
+          width: this.xyWidth,
+          length: this.xyLength
+        });
+        this.computeGridVertices({
+          computeXZ: true,
+          width: this.xyWidth,
+          length: this.xyLength
+        });
       }
       else{
-        this.computeGridVertices({ computeXZ: true, width: this.xzWidth, length: this.xzLength });
-        this.computeGridVertices({ computeXY: true, width: this.xyWidth, length: this.xyLength });
-        this.computeGridVertices({ computeYZ: true, width: this.yzWidth, length: this.yzLength });
+        this.computeGridVertices({
+          computeXZ: true,
+          width: this.xzWidth,
+          length: this.xzLength
+        });
+        this.computeGridVertices({
+          computeXY: true,
+          width: this.xyWidth,
+          length: this.xyLength
+        });
+        this.computeGridVertices({
+          computeYZ: true,
+          width: this.yzWidth,
+          length: this.yzLength
+        });
       }
 
       var xzUpVector = new THREE.Vector3().fromArray([0, 1, 0]);
@@ -238,15 +283,24 @@ var CoordSys3D = function(_THREE$Object3D){
       var xRayLineGeometry = new LineGeometry();
       var yRayLineGeometry = new LineGeometry();
       var zRayLineGeometry = new LineGeometry();
-      var initRayLinesPos = [ this.origin.x, this.origin.y, this.origin.z,
-                              this.origin.x, this.origin.y, this.origin.z ];
 
-      xAxisGeometry.setPositions([ this.origin.x, this.origin.y, this.origin.z,
-                                   this.xyLength + this.origin.x, this.origin.y, this.origin.z ]);
-      yAxisGeometry.setPositions([ this.origin.x, this.origin.y, this.origin.z,
-                                   this.origin.x, this.xyLength + this.origin.y, this.origin.z ]);
-      zAxisGeometry.setPositions([ this.origin.x, this.origin.y, this.origin.z,
-                                   this.origin.x, this.origin.y, this.yzLength + this.origin.z]);
+      var initRayLinesPos = [
+        this.origin.x, this.origin.y, this.origin.z,
+        this.origin.x, this.origin.y, this.origin.z
+      ];
+
+      xAxisGeometry.setPositions([
+        this.origin.x, this.origin.y, this.origin.z,
+        this.xyLength + this.origin.x, this.origin.y, this.origin.z
+      ]);
+      yAxisGeometry.setPositions([
+        this.origin.x, this.origin.y, this.origin.z,
+        this.origin.x, this.xyLength + this.origin.y, this.origin.z
+      ]);
+      zAxisGeometry.setPositions([
+        this.origin.x, this.origin.y, this.origin.z,
+        this.origin.x, this.origin.y, this.yzLength + this.origin.z
+      ]);
       xRayLineGeometry.setPositions(initRayLinesPos);
       yRayLineGeometry.setPositions(initRayLinesPos);
       zRayLineGeometry.setPositions(initRayLinesPos);
@@ -255,12 +309,18 @@ var CoordSys3D = function(_THREE$Object3D){
       var yAxisColor = hexToRgb(this.yAxisColor);
       var zAxisColor = hexToRgb(this.zAxisColor);
 
-      var xDirColors = [ xAxisColor.r, xAxisColor.g, xAxisColor.b,
-                         xAxisColor.r, xAxisColor.g, xAxisColor.b ];
-      var yDirColors = [ yAxisColor.r, yAxisColor.g, yAxisColor.b,
-                         yAxisColor.r, yAxisColor.g, yAxisColor.b ];
-      var zDirColors = [ zAxisColor.r, zAxisColor.g, zAxisColor.b,
-                         zAxisColor.r, zAxisColor.g, zAxisColor.b ];
+      var xDirColors = [
+        xAxisColor.r, xAxisColor.g, xAxisColor.b,
+        xAxisColor.r, xAxisColor.g, xAxisColor.b
+      ];
+      var yDirColors = [
+        yAxisColor.r, yAxisColor.g, yAxisColor.b,
+        yAxisColor.r, yAxisColor.g, yAxisColor.b
+      ];
+      var zDirColors = [
+        zAxisColor.r, zAxisColor.g, zAxisColor.b,
+        zAxisColor.r, zAxisColor.g, zAxisColor.b
+      ];
 
       xAxisGeometry.setColors(xDirColors);
       xRayLineGeometry.setColors(xDirColors);
@@ -297,19 +357,39 @@ var CoordSys3D = function(_THREE$Object3D){
       this.yRayLine = new Line2( yRayLineGeometry, raylineThickLineMaterial );
       this.zRayLine = new Line2( zRayLineGeometry, raylineThickLineMaterial );
 
+      this.xAxisArrow = new THREE.ArrowHelper(
+        new THREE.Vector3(1, 0, 0),
+        new THREE.Vector3(this.origin.x, this.origin.y, this.origin.z),
+        this.xzLength + this.xzLength/10,
+        this.xAxisColor,
+        this.xzLength * 0.1,
+        this.xzLength * 0.03
+      );
+      this.yAxisArrow = new THREE.ArrowHelper(
+        new THREE.Vector3(0, 1, 0),
+        new THREE.Vector3(this.origin.x, this.origin.y, this.origin.z),
+        this.xyLength + this.xzLength/10,
+        this.yAxisColor,
+        this.xyLength * 0.1,
+        this.xyLength * 0.03
+      );
+      this.zAxisArrow = new THREE.ArrowHelper(
+        new THREE.Vector3(0, 0, 1),
+        new THREE.Vector3(this.origin.x, this.origin.y, this.origin.z),
+        this.yzLength + this.xzLength/10,
+        this.zAxisColor,
+        this.yzLength * 0.1,
+        this.yzLength * 0.03
+      );
+
+
       this.xAxis.computeLineDistances();
       this.yAxis.computeLineDistances();
       this.zAxis.computeLineDistances();
-      this.xRayLine.computeLineDistances();
-      this.yRayLine.computeLineDistances();
-      this.zRayLine.computeLineDistances();
 
       this.xAxis.scale.set( 1, 1, 1 );
       this.yAxis.scale.set( 1, 1, 1 );
       this.zAxis.scale.set( 1, 1, 1 );
-      this.xRayLine.scale.set( 1, 1, 1 );
-      this.yRayLine.scale.set( 1, 1, 1 );
-      this.zRayLine.scale.set( 1, 1, 1 );
 
       this.xRayLine.visible = false;
       this.yRayLine.visible = false;
@@ -321,6 +401,9 @@ var CoordSys3D = function(_THREE$Object3D){
       this.add(this.xRayLine);
       this.add(this.yRayLine);
       this.add(this.zRayLine);
+      this.add(this.xAxisArrow);
+      this.add(this.yAxisArrow);
+      this.add(this.zAxisArrow);
     }
   }, {
     key: "computeGridVertices",
@@ -471,6 +554,12 @@ var CoordSys3D = function(_THREE$Object3D){
           this.remove(this.yRayLine);
         if(this.zRayLine !== undefined)
           this.remove(this.zRayLine);
+        if(this.xAxisArrow !== undefined)
+          this.remove(this.xAxisArrow);
+        if(this.yAxisArrow !== undefined)
+          this.remove(this.yAxisArrow);
+        if(this.zAxisArrow !== undefined)
+          this.remove(this.zAxisArrow);
       }
     }
   }, {
