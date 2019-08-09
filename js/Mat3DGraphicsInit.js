@@ -6,7 +6,7 @@
 
 import { CoordSys3D } from './coordinate_system/CoordSys3D.js'
 
-const GRIDS_SCALE = 2.5;
+const GRIDS_SCALE = 5;
 const GRIDS_SUB_DIV = 10;
 
 // global program variables

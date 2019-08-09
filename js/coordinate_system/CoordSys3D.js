@@ -558,20 +558,26 @@ var CoordSys3D = function(_THREE$Object3D){
 
       if(removeXZ || removeXY || removeYZ){
         if(removeXZ){
-          if(this.xzMainGrid !== undefined)
-            this.remove(this.xzMainGrid);
+          if(this.xzMainGrid1 !== undefined)
+            this.remove(this.xzMainGrid1);
+          if(this.xzMainGrid2 !== undefined)
+            this.remove(this.xzMainGrid2);
           if(this.xzSubGrid !== undefined)
             this.remove(this.xzSubGrid);
         }
         if(removeXY){
-          if(this.xyMainGrid !== undefined)
-            this.remove(this.xyMainGrid);
+          if(this.xyMainGrid1 !== undefined)
+            this.remove(this.xyMainGrid1);
+          if(this.xyMainGrid2 !== undefined)
+            this.remove(this.xyMainGrid2);
           if(this.xySubGrid !== undefined)
             this.remove(this.xySubGrid);
         }
         if(removeYZ){
-          if(this.yzMainGrid !== undefined)
-            this.remove(this.yzMainGrid);
+          if(this.yzMainGrid1 !== undefined)
+            this.remove(this.yzMainGrid1);
+          if(this.yzMainGrid2 !== undefined)
+            this.remove(this.yzMainGrid2);
           if(this.yzSubGrid !== undefined)
             this.remove(this.yzSubGrid);
         }
@@ -582,12 +588,18 @@ var CoordSys3D = function(_THREE$Object3D){
           this.remove(this.yAxis);
         if(this.zAxis !== undefined)
           this.remove(this.zAxis);
-        if(this.xRayLine !== undefined)
-          this.remove(this.xRayLine);
-        if(this.yRayLine !== undefined)
-          this.remove(this.yRayLine);
-        if(this.zRayLine !== undefined)
-          this.remove(this.zRayLine);
+        if(this.xRayLine1 !== undefined)
+          this.remove(this.xRayLine1);
+        if(this.xRayLine2 !== undefined)
+          this.remove(this.xRayLine2);
+        if(this.yRayLine1 !== undefined)
+          this.remove(this.yRayLine1);
+        if(this.yRayLine2 !== undefined)
+          this.remove(this.yRayLine2);
+        if(this.zRayLine1 !== undefined)
+          this.remove(this.zRayLine1);
+        if(this.zRayLine2 !== undefined)
+          this.remove(this.zRayLine2);
         if(this.xAxisArrow !== undefined)
           this.remove(this.xAxisArrow);
         if(this.yAxisArrow !== undefined)
