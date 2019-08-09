@@ -24,7 +24,7 @@ var TRANSFM_ARR = [];
 function init(){
   // RENDERER
   var canvas = document.getElementById('canvas1');
-  RENDERER = new THREE.WebGLRenderer({canvas: canvas}, {antialias: true});
+  RENDERER = new THREE.WebGLRenderer({canvas: canvas, antialias: true, alpha: true});
   RENDERER.setClearColor(0xffffff);
   RENDERER.setSize(window.innerWidth, window.innerHeight);
 
@@ -56,6 +56,18 @@ function init(){
   _3D_GRID = new CoordSys3D({origin: {x: -2.5, y: -0.5, z: -2.5}});
   _3D_GRID.name = "My3DGrid";
   SCENE.add(_3D_GRID);
+
+  /*
+  var text2 = new THREE_Text2D.MeshText2D("1", {
+    font: '50px Arial',
+    fillStyle: '#000000'
+  })
+  text2.material.alphaTest = 0.25
+  text2.position.set(0,-0.5,2.5);
+  text2.rotation.set(-90, 0, 0);
+  text2.scale.set(1/100,1/100,1/100);
+  SCENE.add(text2)
+  */
 
   // SETUP GUI
   var customContainer = document.getElementById('a_gui');
@@ -108,9 +120,12 @@ var animate = function(){
   _3D_GRID.yAxisMat.resolution.set(window.innerWidth, window.innerHeight);
   _3D_GRID.zAxisMat.resolution.set(window.innerWidth, window.innerHeight);
 
-  _3D_GRID.xRayLineMat.resolution.set(window.innerWidth, window.innerHeight);
-  _3D_GRID.yRayLineMat.resolution.set(window.innerWidth, window.innerHeight);
-  _3D_GRID.zRayLineMat.resolution.set(window.innerWidth, window.innerHeight);
+  _3D_GRID.xRayLineMat1.resolution.set(window.innerWidth, window.innerHeight);
+  _3D_GRID.xRayLineMat2.resolution.set(window.innerWidth, window.innerHeight);
+  _3D_GRID.yRayLineMat1.resolution.set(window.innerWidth, window.innerHeight);
+  _3D_GRID.yRayLineMat2.resolution.set(window.innerWidth, window.innerHeight);
+  _3D_GRID.zRayLineMat1.resolution.set(window.innerWidth, window.innerHeight);
+  _3D_GRID.zRayLineMat2.resolution.set(window.innerWidth, window.innerHeight);
 
   updateRayCaster();
   RENDERER.render(SCENE, CAMERA);
@@ -139,50 +154,70 @@ function updateRayCaster(){
   if(intersects.length > 0){
     var intersect_pt = intersects[ 0 ].point;
 
-    var xRayLineGeo = _3D_GRID.xRayLine.geometry;
-    var yRayLineGeo = _3D_GRID.yRayLine.geometry;
-    var zRayLineGeo = _3D_GRID.zRayLine.geometry;
+    var xRayLineGeo1 = _3D_GRID.xRayLine1.geometry;
+    var xRayLineGeo2 = _3D_GRID.xRayLine2.geometry;
+    var yRayLineGeo1 = _3D_GRID.yRayLine1.geometry;
+    var yRayLineGeo2 = _3D_GRID.yRayLine2.geometry;
+    var zRayLineGeo1 = _3D_GRID.zRayLine1.geometry;
+    var zRayLineGeo2 = _3D_GRID.zRayLine2.geometry;
 
     var xOrigin = _3D_GRID.origin.x;
     var yOrigin = _3D_GRID.origin.y;
     var zOrigin = _3D_GRID.origin.z;
 
-    xRayLineGeo.setPositions([ xOrigin, intersect_pt.y, intersect_pt.z,
-                               intersect_pt.x, intersect_pt.y, intersect_pt.z ]);
+    var xAxisMax = _3D_GRID.xAxis.geometry.boundingBox.max.x;
+    var yAxisMax = _3D_GRID.yAxis.geometry.boundingBox.max.y;
+    var zAxisMax = _3D_GRID.zAxis.geometry.boundingBox.max.z;
 
-    yRayLineGeo.setPositions([ intersect_pt.x, yOrigin, intersect_pt.z,
-                               intersect_pt.x, intersect_pt.y, intersect_pt.z ]);
+    var xAxisMin = _3D_GRID.xAxis.geometry.boundingBox.min.x;
+    var yAxisMin = _3D_GRID.yAxis.geometry.boundingBox.min.y;
+    var zAxisMin = _3D_GRID.zAxis.geometry.boundingBox.min.z;
 
-    zRayLineGeo.setPositions([ intersect_pt.x, intersect_pt.y, zOrigin,
-                               intersect_pt.x, intersect_pt.y, intersect_pt.z ]);
 
-    _3D_GRID.xRayLine.computeLineDistances();
-    _3D_GRID.yRayLine.computeLineDistances();
-    _3D_GRID.zRayLine.computeLineDistances();
+    xRayLineGeo1.setPositions([ intersect_pt.x, yOrigin, zAxisMin,
+                                intersect_pt.x, yAxisMax, zAxisMin ]);
+    xRayLineGeo2.setPositions([ intersect_pt.x, yOrigin, zAxisMin,
+                                intersect_pt.x, yAxisMin, zAxisMax ]);
+    yRayLineGeo1.setPositions([ xOrigin, intersect_pt.y, zAxisMin,
+                                xAxisMax, intersect_pt.y, zAxisMin ]);
+    yRayLineGeo2.setPositions([ xOrigin, intersect_pt.y, zAxisMin,
+                                xAxisMin, intersect_pt.y, zAxisMax ]);
+    zRayLineGeo1.setPositions([ xAxisMin, yAxisMin, intersect_pt.z,
+                                xAxisMin, yAxisMax, intersect_pt.z ]);
+    zRayLineGeo2.setPositions([ xAxisMin, yAxisMin, intersect_pt.z,
+                                xAxisMax, yAxisMin, intersect_pt.z ]);
 
-    _3D_GRID.xRayLine.scale.set(1, 1, 1);
-    _3D_GRID.yRayLine.scale.set(1, 1, 1);
-    _3D_GRID.zRayLine.scale.set(1, 1, 1);
+    _3D_GRID.xRayLine1.computeLineDistances();
+    _3D_GRID.xRayLine2.computeLineDistances();
+    _3D_GRID.yRayLine1.computeLineDistances();
+    _3D_GRID.yRayLine2.computeLineDistances();
+    _3D_GRID.zRayLine1.computeLineDistances();
+    _3D_GRID.zRayLine2.computeLineDistances();
 
-    _3D_GRID.xRayLine.visible = true;
-    _3D_GRID.yRayLine.visible = true;
-    _3D_GRID.zRayLine.visible = true;
+    _3D_GRID.xRayLine1.visible = true;
+    _3D_GRID.xRayLine2.visible = true;
+    _3D_GRID.yRayLine1.visible = true;
+    _3D_GRID.yRayLine2.visible = true;
+    _3D_GRID.zRayLine1.visible = true;
+    _3D_GRID.zRayLine2.visible = true;
 
     DAT_GUI.__controllers[1].setValue(intersect_pt.x.toString());
     DAT_GUI.__controllers[2].setValue(intersect_pt.y.toString());
     DAT_GUI.__controllers[3].setValue(intersect_pt.z.toString());
   }
   else{
-    _3D_GRID.xRayLine.visible = false;
-    _3D_GRID.yRayLine.visible = false;
-    _3D_GRID.zRayLine.visible = false;
+    _3D_GRID.xRayLine1.visible = false;
+    _3D_GRID.xRayLine2.visible = false;
+    _3D_GRID.yRayLine1.visible = false;
+    _3D_GRID.yRayLine2.visible = false;
+    _3D_GRID.zRayLine1.visible = false;
+    _3D_GRID.zRayLine2.visible = false;
 
     DAT_GUI.__controllers[1].setValue('0.0');
     DAT_GUI.__controllers[2].setValue('0.0');
     DAT_GUI.__controllers[3].setValue('0.0');
   }
 }
-
 
 
 /**
