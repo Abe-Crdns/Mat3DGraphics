@@ -690,9 +690,18 @@ function adjustCoordSys(boundingBox){
   var zAxisMax = _3D_GRID.zAxis.geometry.boundingBox.max.z;
   var zAxisMin = _3D_GRID.zAxis.geometry.boundingBox.min.z;
 
+  var gridsSubStepSize = _3D_GRID.step/GRIDS_SUB_DIV;
+
+  var isSmallerSubSize =
+    (Math.abs(boundingBox.max.x) + Math.abs(boundingBox.min.x)) < gridsSubStepSize ||
+    (Math.abs(boundingBox.max.y) + Math.abs(boundingBox.min.y)) < gridsSubStepSize ||
+    (Math.abs(boundingBox.max.z) + Math.abs(boundingBox.min.z)) < gridsSubStepSize;
+
+
   if( boundingBox.max.x > xAxisMax || boundingBox.min.x < xAxisMin ||
       boundingBox.max.y > yAxisMax || boundingBox.min.y < yAxisMin ||
-      boundingBox.max.z > zAxisMax || boundingBox.min.z < zAxisMin ){
+      boundingBox.max.z > zAxisMax || boundingBox.min.z < zAxisMin ||
+      isSmallerSubSize){
 
     var xOrigin = _3D_GRID.origin.x;
     var yOrigin = _3D_GRID.origin.y;
@@ -714,14 +723,11 @@ function adjustCoordSys(boundingBox){
     var scale;
     var step = _3D_GRID.step;
     var stepSubDivisions = _3D_GRID.stepSubDivisions;
-    var gridsSubStepSize = _3D_GRID.step/GRIDS_SUB_DIV;
 
     if( boundingBox.max.x > xOrigin + _3D_GRID.xzLength ||
         boundingBox.max.y > yOrigin + _3D_GRID.xyLength ||
         boundingBox.max.z > zOrigin + _3D_GRID.yzLength ||
-        (Math.abs(boundingBox.max.x) + Math.abs(boundingBox.min.x)) < gridsSubStepSize ||
-        (Math.abs(boundingBox.max.y) + Math.abs(boundingBox.min.y)) < gridsSubStepSize ||
-        (Math.abs(boundingBox.max.z) + Math.abs(boundingBox.min.z)) < gridsSubStepSize ){
+        isSmallerSubSize ){
 
       var max = Math.max(boundingBox.max.x, boundingBox.max.y, boundingBox.max.z);
       var min = Math.min(boundingBox.min.x, boundingBox.min.y, boundingBox.min.z);

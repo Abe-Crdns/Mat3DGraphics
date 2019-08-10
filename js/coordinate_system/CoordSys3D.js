@@ -573,66 +573,66 @@ var CoordSys3D = function(_THREE$Object3D){
           this.remove(this.yAxis);
         if(this.zAxis !== undefined)
           this.remove(this.zAxis);
-        if(this.xRayLine1 !== undefined)
-          this.remove(this.xRayLine1);
-        if(this.xRayLine2 !== undefined)
-          this.remove(this.xRayLine2);
-        if(this.yRayLine1 !== undefined)
-          this.remove(this.yRayLine1);
-        if(this.yRayLine2 !== undefined)
-          this.remove(this.yRayLine2);
-        if(this.zRayLine1 !== undefined)
-          this.remove(this.zRayLine1);
-        if(this.zRayLine2 !== undefined)
-          this.remove(this.zRayLine2);
         if(this.xAxisArrow !== undefined)
           this.remove(this.xAxisArrow);
         if(this.yAxisArrow !== undefined)
           this.remove(this.yAxisArrow);
         if(this.zAxisArrow !== undefined)
           this.remove(this.zAxisArrow);
+
+        if(this.rayLines !== undefined){
+          for(var i = 0; i < this.rayLines.length; i++){
+            this.remove(this.rayLines[i]);
+          }
+        }
       }
     }
   }, {
     key: "setXZopacity",
     value: function setXZopacity(opacity) {
       this.xzOpacity = opacity;
-      this.xzMainGrid.material.opacity = opacity;
+      this.xzMainGrid1.material.opacity = opacity;
+      this.xzMainGrid2.material.opacity = opacity;
       this.xzSubGrid.material.opacity = opacity / 2;
     }
   }, {
     key: "setXYopacity",
     value: function setXYopacity(opacity) {
       this.xyOpacity = opacity;
-      this.xyMainGrid.material.opacity = opacity;
+      this.xyMainGrid1.material.opacity = opacity;
+      this.xyMainGrid2.material.opacity = opacity;
       this.xySubGrid.material.opacity = opacity / 2;
     }
   }, {
     key: "setYZopacity",
     value: function setYZopacity(opacity) {
       this.yzOpacity = opacity;
-      this.yzMainGrid.material.opacity = opacity;
+      this.yzMainGrid1.material.opacity = opacity;
+      this.yzMainGrid2.material.opacity = opacity;
       this.yzSubGrid.material.opacity = opacity / 2;
     }
   }, {
     key: "setXZcolor",
     value: function setXZcolor(color) {
       this.xzColor = color;
-      this.xzMainGrid.material.color = new THREE.Color().setHex(this.xzColor);
+      this.xzMainGrid1.material.color = new THREE.Color().setHex(this.xzColor);
+      this.xzMainGrid2.material.color = new THREE.Color().setHex(this.xzColor);
       this.xzSubGrid.material.color = new THREE.Color().setHex(this.xzColor);
     }
   }, {
     key: "setXYcolor",
     value: function setXYcolor(color) {
       this.xyColor = color;
-      this.xyMainGrid.material.color = new THREE.Color().setHex(this.xyColor);
+      this.xyMainGrid1.material.color = new THREE.Color().setHex(this.xyColor);
+      this.xyMainGrid2.material.color = new THREE.Color().setHex(this.xyColor);
       this.xySubGrid.material.color = new THREE.Color().setHex(this.xyColor);
     }
   }, {
     key: "setYZcolor",
     value: function setYZcolor(color) {
       this.yzColor = color;
-      this.yzMainGrid.material.color = new THREE.Color().setHex(this.yzColor);
+      this.yzMainGrid1.material.color = new THREE.Color().setHex(this.yzColor);
+      this.yzMainGrid2.material.color = new THREE.Color().setHex(this.yzColor);
       this.yzSubGrid.material.color = new THREE.Color().setHex(this.yzColor);
     }
   }, {
