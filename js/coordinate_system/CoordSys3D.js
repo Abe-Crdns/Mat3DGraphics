@@ -26,6 +26,10 @@ var CoordSys3D = function(_THREE$Object3D){
     var origin = (args !== undefined && args.origin !== undefined && args.origin.x !== undefined &&
       args.origin.y !== undefined && args.origin.z !== undefined) ? args.origin : {x: 0, y: 0, z: 0};
 
+    var drawAxes = (args !== undefined && args.drawAxes !== undefined) ? args.drawAxes : true;
+    var allocRayLines = (args !== undefined && args.allocRayLines !== undefined) ? args.allocRayLines : true;
+    var numRayLines = (args !== undefined && args.numRayLines !== undefined) ? args.numRayLines : 6;
+
     var xAxisColor = (args !== undefined && args.xAxisColor !== undefined) ? args.xAxisColor : 0xff0000;
     var yAxisColor = (args !== undefined && args.yAxisColor !== undefined) ? args.yAxisColor : 0x00ff00;
     var zAxisColor = (args !== undefined && args.zAxisColor !== undefined) ? args.zAxisColor : 0x0000ff;
@@ -64,6 +68,9 @@ var CoordSys3D = function(_THREE$Object3D){
 
     _this.origin = origin;
 
+    _this.drawAxes = drawAxes;
+    _this.allocRayLines = allocRayLines;
+
     _this.xzOpacity = xzOpacity;
     _this.xyOpacity = xyOpacity;
     _this.yzOpacity = yzOpacity;
@@ -78,9 +85,7 @@ var CoordSys3D = function(_THREE$Object3D){
 
     _this.step = step;
     _this.stepSubDivisions = stepSubDivisions;
-
-    _this.text = text;
-    _this.textColor = textColor;
+    _this.numRayLines = numRayLines;
 
     _this.name = "";
 
@@ -113,6 +118,124 @@ var CoordSys3D = function(_THREE$Object3D){
         console.log("_draw3DCoordSys: Nothing to draw");
         return;
       }
+
+      var xAxisColor = hexToRgb(this.xAxisColor);
+      var yAxisColor = hexToRgb(this.yAxisColor);
+      var zAxisColor = hexToRgb(this.zAxisColor);
+
+      var xDirColors = [
+        xAxisColor.r, xAxisColor.g, xAxisColor.b,
+        xAxisColor.r, xAxisColor.g, xAxisColor.b
+      ];
+      var yDirColors = [
+        yAxisColor.r, yAxisColor.g, yAxisColor.b,
+        yAxisColor.r, yAxisColor.g, yAxisColor.b
+      ];
+      var zDirColors = [
+        zAxisColor.r, zAxisColor.g, zAxisColor.b,
+        zAxisColor.r, zAxisColor.g, zAxisColor.b
+      ];
+
+      // check if axes will be drawn
+      if(this.drawAxes){
+        var xAxisGeometry = new LineGeometry();
+        var yAxisGeometry = new LineGeometry();
+        var zAxisGeometry = new LineGeometry();
+
+        xAxisGeometry.setPositions([
+          this.origin.x, this.origin.y, this.origin.z,
+          this.xyLength + this.origin.x, this.origin.y, this.origin.z
+        ]);
+        yAxisGeometry.setPositions([
+          this.origin.x, this.origin.y, this.origin.z,
+          this.origin.x, this.xyLength + this.origin.y, this.origin.z
+        ]);
+        zAxisGeometry.setPositions([
+          this.origin.x, this.origin.y, this.origin.z,
+          this.origin.x, this.origin.y, this.yzLength + this.origin.z
+        ]);
+
+        xAxisGeometry.setColors(xDirColors);
+        yAxisGeometry.setColors(yDirColors);
+        zAxisGeometry.setColors(zDirColors);
+
+        var axisThickLineMaterial = new LineMaterial({
+          color: 0xffffff,
+          linewidth: 5,
+          vertexColors: THREE.VertexColors,
+          dashed: false
+        });
+
+        this.xAxis = new Line2(xAxisGeometry, axisThickLineMaterial);
+        this.yAxis = new Line2(yAxisGeometry, axisThickLineMaterial);
+        this.zAxis = new Line2(zAxisGeometry, axisThickLineMaterial);
+
+        this.xAxisArrow = new THREE.ArrowHelper(
+          new THREE.Vector3(1, 0, 0),
+          new THREE.Vector3(this.origin.x, this.origin.y, this.origin.z),
+          this.xzLength + this.xzLength/10,
+          this.xAxisColor,
+          this.xzLength * 0.1,
+          this.xzLength * 0.03
+        );
+        this.yAxisArrow = new THREE.ArrowHelper(
+          new THREE.Vector3(0, 1, 0),
+          new THREE.Vector3(this.origin.x, this.origin.y, this.origin.z),
+          this.xyLength + this.xzLength/10,
+          this.yAxisColor,
+          this.xyLength * 0.1,
+          this.xyLength * 0.03
+        );
+        this.zAxisArrow = new THREE.ArrowHelper(
+          new THREE.Vector3(0, 0, 1),
+          new THREE.Vector3(this.origin.x, this.origin.y, this.origin.z),
+          this.yzLength + this.xzLength/10,
+          this.zAxisColor,
+          this.yzLength * 0.1,
+          this.yzLength * 0.03
+        );
+
+        this.xAxis.computeLineDistances();
+        this.yAxis.computeLineDistances();
+        this.zAxis.computeLineDistances();
+
+        this.add(this.xAxis);
+        this.add(this.yAxis);
+        this.add(this.zAxis);
+        this.add(this.xAxisArrow);
+        this.add(this.yAxisArrow);
+        this.add(this.zAxisArrow);
+      }
+
+      // Check if raylines need to be allocated
+      if(this.allocRayLines){
+        this.rayLines = [];
+        for(var i = 0; i < this.numRayLines; ++i){
+          var raylineThickLineMaterial = new LineMaterial({
+            color: 0xffffff,
+            linewidth: 2,
+            vertexColors: THREE.VertexColors,
+            dashed: false
+          });
+
+          var rayLineGeometry = new LineGeometry();
+          if(i % this.numRayLines < 2)
+            rayLineGeometry.setColors(xDirColors);
+          else if(i % this.numRayLines < 4)
+            rayLineGeometry.setColors(yDirColors);
+          else
+            rayLineGeometry.setColors(zDirColors);
+
+          this.rayLines.push(new Line2(rayLineGeometry, raylineThickLineMaterial));
+          this.rayLines[i].visible = false;
+
+          this.add(this.rayLines[i]);
+        }
+      }
+
+      /**
+       * Draw the the 3d planes.
+       */
 
       if(drawXZ){
         this.xzGridGeometry1 = new THREE.Geometry();
@@ -301,143 +424,6 @@ var CoordSys3D = function(_THREE$Object3D){
         this.add(this.yzMainGrid2);
         this.add(this.yzSubGrid);
       }
-
-      var xAxisGeometry = new LineGeometry();
-      var yAxisGeometry = new LineGeometry();
-      var zAxisGeometry = new LineGeometry();
-      var xRayLineGeometry1 = new LineGeometry();
-      var xRayLineGeometry2 = new LineGeometry();
-      var yRayLineGeometry1 = new LineGeometry();
-      var yRayLineGeometry2 = new LineGeometry();
-      var zRayLineGeometry1 = new LineGeometry();
-      var zRayLineGeometry2 = new LineGeometry();
-
-      xAxisGeometry.setPositions([
-        this.origin.x, this.origin.y, this.origin.z,
-        this.xyLength + this.origin.x, this.origin.y, this.origin.z
-      ]);
-      yAxisGeometry.setPositions([
-        this.origin.x, this.origin.y, this.origin.z,
-        this.origin.x, this.xyLength + this.origin.y, this.origin.z
-      ]);
-      zAxisGeometry.setPositions([
-        this.origin.x, this.origin.y, this.origin.z,
-        this.origin.x, this.origin.y, this.yzLength + this.origin.z
-      ]);
-
-      var xAxisColor = hexToRgb(this.xAxisColor);
-      var yAxisColor = hexToRgb(this.yAxisColor);
-      var zAxisColor = hexToRgb(this.zAxisColor);
-
-      var xDirColors = [
-        xAxisColor.r, xAxisColor.g, xAxisColor.b,
-        xAxisColor.r, xAxisColor.g, xAxisColor.b
-      ];
-      var yDirColors = [
-        yAxisColor.r, yAxisColor.g, yAxisColor.b,
-        yAxisColor.r, yAxisColor.g, yAxisColor.b
-      ];
-      var zDirColors = [
-        zAxisColor.r, zAxisColor.g, zAxisColor.b,
-        zAxisColor.r, zAxisColor.g, zAxisColor.b
-      ];
-
-      xAxisGeometry.setColors(xDirColors);
-      xRayLineGeometry1.setColors(xDirColors);
-      xRayLineGeometry2.setColors(xDirColors);
-      yAxisGeometry.setColors(yDirColors);
-      yRayLineGeometry1.setColors(yDirColors);
-      yRayLineGeometry2.setColors(yDirColors);
-      zAxisGeometry.setColors(zDirColors);
-      zRayLineGeometry1.setColors(zDirColors);
-      zRayLineGeometry2.setColors(zDirColors);
-
-      var axisThickLineMaterial = new LineMaterial({
-        color: 0xffffff,
-        linewidth: 5,
-        vertexColors: THREE.VertexColors,
-        dashed: false
-      });
-
-      var raylineThickLineMaterial = new LineMaterial({
-        color: 0xffffff,
-        linewidth: 2,
-        vertexColors: THREE.VertexColors,
-        dashed: false
-      });
-
-      this.xAxisMat = axisThickLineMaterial;
-      this.yAxisMat = axisThickLineMaterial;
-      this.zAxisMat = axisThickLineMaterial;
-      this.xRayLineMat1 = raylineThickLineMaterial;
-      this.xRayLineMat2 = raylineThickLineMaterial;
-      this.yRayLineMat1 = raylineThickLineMaterial;
-      this.yRayLineMat2 = raylineThickLineMaterial;
-      this.zRayLineMat1 = raylineThickLineMaterial;
-      this.zRayLineMat2 = raylineThickLineMaterial;
-
-      this.xAxis = new Line2( xAxisGeometry, axisThickLineMaterial );
-      this.yAxis = new Line2( yAxisGeometry, axisThickLineMaterial );
-      this.zAxis = new Line2( zAxisGeometry, axisThickLineMaterial );
-      this.xRayLine1 = new Line2( xRayLineGeometry1, raylineThickLineMaterial );
-      this.xRayLine2 = new Line2( xRayLineGeometry2, raylineThickLineMaterial );
-      this.yRayLine1 = new Line2( yRayLineGeometry1, raylineThickLineMaterial );
-      this.yRayLine2 = new Line2( yRayLineGeometry2, raylineThickLineMaterial );
-      this.zRayLine1 = new Line2( zRayLineGeometry1, raylineThickLineMaterial );
-      this.zRayLine2 = new Line2( zRayLineGeometry2, raylineThickLineMaterial );
-
-      this.xAxisArrow = new THREE.ArrowHelper(
-        new THREE.Vector3(1, 0, 0),
-        new THREE.Vector3(this.origin.x, this.origin.y, this.origin.z),
-        this.xzLength + this.xzLength/10,
-        this.xAxisColor,
-        this.xzLength * 0.1,
-        this.xzLength * 0.03
-      );
-      this.yAxisArrow = new THREE.ArrowHelper(
-        new THREE.Vector3(0, 1, 0),
-        new THREE.Vector3(this.origin.x, this.origin.y, this.origin.z),
-        this.xyLength + this.xzLength/10,
-        this.yAxisColor,
-        this.xyLength * 0.1,
-        this.xyLength * 0.03
-      );
-      this.zAxisArrow = new THREE.ArrowHelper(
-        new THREE.Vector3(0, 0, 1),
-        new THREE.Vector3(this.origin.x, this.origin.y, this.origin.z),
-        this.yzLength + this.xzLength/10,
-        this.zAxisColor,
-        this.yzLength * 0.1,
-        this.yzLength * 0.03
-      );
-
-      this.xAxis.computeLineDistances();
-      this.yAxis.computeLineDistances();
-      this.zAxis.computeLineDistances();
-
-      this.xAxis.scale.set( 1, 1, 1 );
-      this.yAxis.scale.set( 1, 1, 1 );
-      this.zAxis.scale.set( 1, 1, 1 );
-
-      this.xRayLine1.visible = false;
-      this.xRayLine2.visible = false;
-      this.yRayLine1.visible = false;
-      this.yRayLine2.visible = false;
-      this.zRayLine1.visible = false;
-      this.zRayLine2.visible = false;
-
-      this.add(this.xAxis);
-      this.add(this.yAxis);
-      this.add(this.zAxis);
-      this.add(this.xRayLine1);
-      this.add(this.xRayLine2);
-      this.add(this.yRayLine1);
-      this.add(this.yRayLine2);
-      this.add(this.zRayLine1);
-      this.add(this.zRayLine2);
-      this.add(this.xAxisArrow);
-      this.add(this.yAxisArrow);
-      this.add(this.zAxisArrow);
     }
   }, {
     key: "computeGridVertices",
@@ -452,7 +438,6 @@ var CoordSys3D = function(_THREE$Object3D){
       var stepSubDivisions = this.stepSubDivisions;
 
       if(computeXZ || computeXY || computeYZ){
-
         for(var i = -width; i < 0; i += step / stepSubDivisions){
           if(computeXZ){
             var pt1 = new THREE.Vector3(this.origin.x, i - this.origin.z, this.origin.y);
