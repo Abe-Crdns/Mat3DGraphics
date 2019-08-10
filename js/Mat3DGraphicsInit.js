@@ -108,10 +108,6 @@ var animate = function(){
   _3D_GRID.yAxis.material.resolution.set(window.innerWidth, window.innerHeight);
   _3D_GRID.zAxis.material.resolution.set(window.innerWidth, window.innerHeight);
 
-  for(var i = 0; i < _3D_GRID.rayLines.length; i++)
-    _3D_GRID.rayLines[i].material.resolution.set(window.innerWidth, window.innerHeight);
-
-  updateRayCaster();
   RENDERER.render(SCENE, CAMERA);
   RENDERER.clearDepth();
 };
@@ -127,6 +123,11 @@ function onDocumentMouseMove(event){
 
   MOUSE.x = (event.clientX / window.innerWidth) * 2 - 1;
   MOUSE.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+  for(var i = 0; i < _3D_GRID.rayLines.length; i++)
+    _3D_GRID.rayLines[i].material.resolution.set(window.innerWidth, window.innerHeight);
+
+  updateRayCaster();
 }
 
 function updateRayCaster(){
