@@ -9,17 +9,21 @@ const MAT3D_CUBE = function(){
   cube_geo.computeBoundingBox();
 
   var j = 0;
-  var cube_colors = [ 0xffff00, 0xff8c00, 0xff00ff,
-                      0x00fe0e, 0x00ffff, 0x4c4c4c ];
+  var cube_colors = [
+    0xffff00, 0xff8c00, 0xff00ff,
+    0x00fe0e, 0x00ffff, 0x4c4c4c
+  ];
   for(var i = 0; i < cube_geo.faces.length; i+=2){
     cube_geo.faces[i].color.setHex(cube_colors[j]);
     cube_geo.faces[i+1].color.setHex(cube_colors[j]);
     j++;
   }
 
-  var material = new THREE.MeshStandardMaterial({ vertexColors: THREE.FaceColors,
-                                                  opacity: 0.7,
-                                                  transparent: true });
+  var material = new THREE.MeshStandardMaterial({
+    vertexColors: THREE.FaceColors,
+    opacity: 0.7,
+    transparent: true
+  });
   var cube_mesh = new THREE.Mesh(cube_geo, material);
   cube_mesh.name = "cube1mesh";
 
@@ -32,9 +36,11 @@ const MAT3D_TEAPOT = function(){
   teapot_geo.name = "mat3dteapot";
   teapot_geo.computeBoundingBox();
 
-  var teapot_material = new THREE.MeshStandardMaterial({ vertexColors: THREE.FaceColors,
-                                                         opacity: 0.7,
-                                                         transparent: true });
+  var teapot_material = new THREE.MeshStandardMaterial({
+    vertexColors: THREE.FaceColors,
+    opacity: 0.7,
+    transparent: true
+  });
   var teapot_mesh = new THREE.Mesh(teapot_geo, teapot_material);
   teapot_mesh.name = "teapot1mesh";
 
@@ -65,9 +71,11 @@ const MAT3D_SPHERE = function(){
       col_ind--;
   }
 
-  var material = new THREE.MeshStandardMaterial({ vertexColors: THREE.FaceColors,
-                                                  opacity: 0.7,
-                                                  transparent: true });
+  var material = new THREE.MeshStandardMaterial({
+    vertexColors: THREE.FaceColors,
+    opacity: 0.7,
+    transparent: true
+  });
   var sphere_mesh = new THREE.Mesh(sphere_geo, material);
   sphere_mesh.name = "sphere1mesh";
 
@@ -85,9 +93,11 @@ const MAT3D_CYLINDER = function(){
     faces.color.setHex(cylinder_colors[i % 3]);
   });
 
-  var material = new THREE.MeshStandardMaterial({ vertexColors: THREE.FaceColors,
-                                                  opacity: 0.7,
-                                                  transparent: true });
+  var material = new THREE.MeshStandardMaterial({
+    vertexColors: THREE.FaceColors,
+    opacity: 0.7,
+    transparent: true
+  });
   var cylinder_mesh = new THREE.Mesh(cylinder_geo, material);
   cylinder_mesh.name = "cylinder1mesh";
 

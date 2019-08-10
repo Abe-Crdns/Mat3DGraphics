@@ -4,19 +4,26 @@
  * @version 2.0
  */
 
+import { Line2 } from './geometries/lines/Line2.js';
+import { LineMaterial } from './geometries/lines/LineMaterial.js';
+import { LineGeometry } from './geometries/lines/LineGeometry.js';
 import { CoordSys3D } from './coordinate_system/CoordSys3D.js'
 
 // global program variables
 const GRIDS_SCALE = 5;
 const GRIDS_SUB_DIV = 10;
+const NUM_RAY_LINES = 6;
 
 var RENDERER, SCENE, CAMERA, CONTROLS;
 var RAYCASTER, GEOMETRY, MESH, _3D_GRID;
+var MOUSE_POINT;
+
+var RAY_LINES = [];
+var INTERSECT_OBJS = [];
+var TRANSFM_ARR = [];
 
 var DAT_GUI = new dat.GUI();
 var MOUSE = new THREE.Vector2(0, 0);
-var INTERSECT_OBJS = [];
-var TRANSFM_ARR = [];
 
 /**
  * Init/main function
@@ -52,10 +59,58 @@ function init(){
   INTERSECT_OBJS.push(MESH);
   SCENE.add(MESH);
 
-  // DEFAULT COORDINATE SYSTEM (includes axis and raylines)
+  MESH.geometry.computeFaceNormals();
+  console.log(MESH.geometry);
+
+  // DEFAULT COORDINATE SYSTEM (includes axes)
   _3D_GRID = new CoordSys3D({origin: {x: -2.5, y: -0.5, z: -2.5}});
   _3D_GRID.name = "My3DGrid";
   SCENE.add(_3D_GRID);
+
+  // RAY LINES
+  for(var i = 0; i < NUM_RAY_LINES; ++i){
+    var raylineThickLineMaterial = new LineMaterial({
+      color: 0xffffff,
+      linewidth: 2,
+      vertexColors: THREE.VertexColors,
+      dashed: false
+    });
+
+    var rayLineGeometry = new LineGeometry();
+
+    if(i % NUM_RAY_LINES < 2){
+      var xAxisGeoAttr = _3D_GRID.xAxis.geometry.attributes;
+      rayLineGeometry.setColors(xAxisGeoAttr.instanceColorStart.data.array);
+    }
+    else if(i % NUM_RAY_LINES < 4){
+      var yAxisGeoAttr = _3D_GRID.yAxis.geometry.attributes;
+      rayLineGeometry.setColors(yAxisGeoAttr.instanceColorStart.data.array);
+    }
+    else{
+      var zAxisGeoAttr = _3D_GRID.zAxis.geometry.attributes;
+      rayLineGeometry.setColors(zAxisGeoAttr.instanceColorStart.data.array);
+    }
+
+    RAY_LINES.push(new Line2(rayLineGeometry, raylineThickLineMaterial));
+    RAY_LINES[i].visible = false;
+
+    SCENE.add(RAY_LINES[i]);
+  }
+
+  // Mouse point
+  var sprite = new THREE.TextureLoader().load('textures/sprites/disc.png');
+  var mouse_pt_geometry = new THREE.Geometry();
+  mouse_pt_geometry.vertices.push(new THREE.Vector3(0, 0, 0));
+  var mouse_pt_material = new THREE.PointsMaterial({
+    color: 0x111111,
+    size: 12.5,
+    sizeAttenuation: false,
+    map: sprite,
+    alphaTest: 0.75,
+  });
+  MOUSE_POINT = new THREE.Points(mouse_pt_geometry, mouse_pt_material);
+  MOUSE_POINT.visible = false;
+  SCENE.add(MOUSE_POINT);
 
   // SETUP GUI
   var customContainer = document.getElementById('a_gui');
@@ -124,8 +179,8 @@ function onDocumentMouseMove(event){
   MOUSE.x = (event.clientX / window.innerWidth) * 2 - 1;
   MOUSE.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
-  for(var i = 0; i < _3D_GRID.rayLines.length; i++)
-    _3D_GRID.rayLines[i].material.resolution.set(window.innerWidth, window.innerHeight);
+  for(var i = 0; i < RAY_LINES.length; i++)
+    RAY_LINES[i].material.resolution.set(window.innerWidth, window.innerHeight);
 
   updateRayCaster();
 }
@@ -137,13 +192,16 @@ function updateRayCaster(){
 
   if(intersects.length > 0){
     var intersect_pt = intersects[0].point;
+    var intersect_norm = intersects[0].face.normal;
+    var geoBoundBoxMax = GEOMETRY.boundingBox.max;
 
-    var xRayLineGeo1 = _3D_GRID.rayLines[0].geometry;
-    var xRayLineGeo2 = _3D_GRID.rayLines[1].geometry;
-    var yRayLineGeo1 = _3D_GRID.rayLines[2].geometry;
-    var yRayLineGeo2 = _3D_GRID.rayLines[3].geometry;
-    var zRayLineGeo1 = _3D_GRID.rayLines[4].geometry;
-    var zRayLineGeo2 = _3D_GRID.rayLines[5].geometry;
+    var xRayLineGeo1 = RAY_LINES[0].geometry;
+    var xRayLineGeo2 = RAY_LINES[1].geometry;
+    var yRayLineGeo1 = RAY_LINES[2].geometry;
+    var yRayLineGeo2 = RAY_LINES[3].geometry;
+    var zRayLineGeo1 = RAY_LINES[4].geometry;
+    var zRayLineGeo2 = RAY_LINES[5].geometry;
+
 
     var xOrigin = _3D_GRID.origin.x;
     var yOrigin = _3D_GRID.origin.y;
@@ -170,18 +228,24 @@ function updateRayCaster(){
     zRayLineGeo2.setPositions([ xAxisMin, yAxisMin, intersect_pt.z,
                                 xAxisMax, yAxisMin, intersect_pt.z ]);
 
-    for(var i = 0; i < _3D_GRID.rayLines.length; i++){
-      _3D_GRID.rayLines[i].computeLineDistances();
-      _3D_GRID.rayLines[i].visible = true;
+    MOUSE_POINT.position.copy(intersects[0].point);
+
+    for(var i = 0; i < RAY_LINES.length; i++){
+      RAY_LINES[i].computeLineDistances();
+      RAY_LINES[i].visible = true;
     }
+
+    MOUSE_POINT.visible = true;
 
     DAT_GUI.__controllers[1].setValue(intersect_pt.x.toString());
     DAT_GUI.__controllers[2].setValue(intersect_pt.y.toString());
     DAT_GUI.__controllers[3].setValue(intersect_pt.z.toString());
   }
   else{
-    for(var i = 0; i < _3D_GRID.rayLines.length; i++)
-      _3D_GRID.rayLines[i].visible = false;
+    for(var i = 0; i < RAY_LINES.length; i++)
+      RAY_LINES[i].visible = false;
+
+    MOUSE_POINT.visible = false;
 
     DAT_GUI.__controllers[1].setValue('0.0');
     DAT_GUI.__controllers[2].setValue('0.0');
@@ -744,11 +808,13 @@ function adjustCoordSys(boundingBox){
       if(scale !== undefined){
         _3D_GRID.setOriginAndResizeAll({
           origin:{
-            x: xOrigin - (scale/2) + ((Math.abs(boundingBox.max.x) +
-                                       Math.abs(boundingBox.min.x))/2),
+            x: xOrigin - (scale/2) +
+                ((Math.abs(boundingBox.max.x) +
+                 Math.abs(boundingBox.min.x))/2),
             y: yOrigin,
-            z: zOrigin - (scale/2) + ((Math.abs(boundingBox.max.z) +
-                                       Math.abs(boundingBox.min.z))/2)
+            z: zOrigin - (scale/2) +
+                ((Math.abs(boundingBox.max.z) +
+                 Math.abs(boundingBox.min.z))/2)
           },
           xzWidth: scale,
           xyWidth: scale,
@@ -799,11 +865,8 @@ function adjustScene(boundingBox){
   DAT_GUI.__controllers[2].setValue('0.0');
   DAT_GUI.__controllers[3].setValue('0.0');
 
-  var max = Math.max(boundingBox.max.x, boundingBox.max.y, boundingBox.max.z);
-  var min = Math.min(boundingBox.min.x, boundingBox.min.y, boundingBox.min.z);
-
-  var amt = (max + Math.abs(min)) * 3;
-  CAMERA.position.x = amt;
-  CAMERA.position.y = amt;
-  CAMERA.position.z = amt;
+  CAMERA.position.x = _3D_GRID.xAxis.geometry.boundingBox.max.x * 1.8;
+  CAMERA.position.y = _3D_GRID.yAxis.geometry.boundingBox.max.y;
+  CAMERA.position.z = _3D_GRID.zAxis.geometry.boundingBox.max.z * 1.8;
+  CAMERA.lookAt(MESH.position);
 }

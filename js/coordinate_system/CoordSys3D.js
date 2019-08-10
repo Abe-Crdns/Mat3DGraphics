@@ -27,8 +27,6 @@ var CoordSys3D = function(_THREE$Object3D){
       args.origin.y !== undefined && args.origin.z !== undefined) ? args.origin : {x: 0, y: 0, z: 0};
 
     var drawAxes = (args !== undefined && args.drawAxes !== undefined) ? args.drawAxes : true;
-    var allocRayLines = (args !== undefined && args.allocRayLines !== undefined) ? args.allocRayLines : true;
-    var numRayLines = (args !== undefined && args.numRayLines !== undefined) ? args.numRayLines : 6;
 
     var xAxisColor = (args !== undefined && args.xAxisColor !== undefined) ? args.xAxisColor : 0xff0000;
     var yAxisColor = (args !== undefined && args.yAxisColor !== undefined) ? args.yAxisColor : 0x00ff00;
@@ -69,7 +67,6 @@ var CoordSys3D = function(_THREE$Object3D){
     _this.origin = origin;
 
     _this.drawAxes = drawAxes;
-    _this.allocRayLines = allocRayLines;
 
     _this.xzOpacity = xzOpacity;
     _this.xyOpacity = xyOpacity;
@@ -85,7 +82,6 @@ var CoordSys3D = function(_THREE$Object3D){
 
     _this.step = step;
     _this.stepSubDivisions = stepSubDivisions;
-    _this.numRayLines = numRayLines;
 
     _this.name = "";
 
@@ -205,32 +201,6 @@ var CoordSys3D = function(_THREE$Object3D){
         this.add(this.xAxisArrow);
         this.add(this.yAxisArrow);
         this.add(this.zAxisArrow);
-      }
-
-      // Check if raylines need to be allocated
-      if(this.allocRayLines){
-        this.rayLines = [];
-        for(var i = 0; i < this.numRayLines; ++i){
-          var raylineThickLineMaterial = new LineMaterial({
-            color: 0xffffff,
-            linewidth: 2,
-            vertexColors: THREE.VertexColors,
-            dashed: false
-          });
-
-          var rayLineGeometry = new LineGeometry();
-          if(i % this.numRayLines < 2)
-            rayLineGeometry.setColors(xDirColors);
-          else if(i % this.numRayLines < 4)
-            rayLineGeometry.setColors(yDirColors);
-          else
-            rayLineGeometry.setColors(zDirColors);
-
-          this.rayLines.push(new Line2(rayLineGeometry, raylineThickLineMaterial));
-          this.rayLines[i].visible = false;
-
-          this.add(this.rayLines[i]);
-        }
       }
 
       /**
@@ -579,12 +549,6 @@ var CoordSys3D = function(_THREE$Object3D){
           this.remove(this.yAxisArrow);
         if(this.zAxisArrow !== undefined)
           this.remove(this.zAxisArrow);
-
-        if(this.rayLines !== undefined){
-          for(var i = 0; i < this.rayLines.length; i++){
-            this.remove(this.rayLines[i]);
-          }
-        }
       }
     }
   }, {
