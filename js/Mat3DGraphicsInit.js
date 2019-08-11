@@ -16,7 +16,7 @@ const NUM_RAY_LINES = 6;
 
 var RENDERER, SCENE, CAMERA, CONTROLS;
 var RAYCASTER, GEOMETRY, MESH, _3D_GRID;
-var MOUSE_POINT;
+var MOUSE_XHAIR;
 
 var RAY_LINES = [];
 var INTERSECT_OBJS = [];
@@ -31,7 +31,11 @@ var MOUSE = new THREE.Vector2(0, 0);
 function init(){
   // RENDERER
   var canvas = document.getElementById('canvas1');
-  RENDERER = new THREE.WebGLRenderer({canvas: canvas, antialias: true, alpha: true});
+  RENDERER = new THREE.WebGLRenderer({
+    canvas: canvas,
+    antialias: true,
+    alpha: true
+  });
   RENDERER.setClearColor(0xffffff);
   RENDERER.setSize(window.innerWidth, window.innerHeight);
 
@@ -59,11 +63,10 @@ function init(){
   INTERSECT_OBJS.push(MESH);
   SCENE.add(MESH);
 
-  MESH.geometry.computeFaceNormals();
-  console.log(MESH.geometry);
-
-  // DEFAULT COORDINATE SYSTEM (includes axes)
-  _3D_GRID = new CoordSys3D({origin: {x: -2.5, y: -0.5, z: -2.5}});
+  // DEFAULT COORDINATE SYSTEM
+  _3D_GRID = new CoordSys3D({
+    origin: {x: -2.5, y: -0.5, z: -2.5}
+  });
   _3D_GRID.name = "My3DGrid";
   SCENE.add(_3D_GRID);
 
@@ -98,19 +101,19 @@ function init(){
   }
 
   // Mouse point
-  var sprite = new THREE.TextureLoader().load('textures/sprites/disc.png');
+  var sprite = new THREE.TextureLoader().load('textures/sprites/crosshair.png');
   var mouse_pt_geometry = new THREE.Geometry();
   mouse_pt_geometry.vertices.push(new THREE.Vector3(0, 0, 0));
+  mouse_pt_geometry.computeBoundingBox();
   var mouse_pt_material = new THREE.PointsMaterial({
-    color: 0x111111,
-    size: 12.5,
+    size: 15,
     sizeAttenuation: false,
     map: sprite,
     alphaTest: 0.75,
   });
-  MOUSE_POINT = new THREE.Points(mouse_pt_geometry, mouse_pt_material);
-  MOUSE_POINT.visible = false;
-  SCENE.add(MOUSE_POINT);
+  MOUSE_XHAIR = new THREE.Points(mouse_pt_geometry, mouse_pt_material);
+  MOUSE_XHAIR.visible = false;
+  SCENE.add(MOUSE_XHAIR);
 
   // SETUP GUI
   var customContainer = document.getElementById('a_gui');
@@ -118,8 +121,11 @@ function init(){
 
   // PREDEFINED OBJECTS
   var objs = { Objects: "Cube" };
-  var objectTypes = DAT_GUI.add(objs, 'Objects',
-                            [ "Cube", "Teapot", "Sphere", "Cylinder", "File" ]).listen();
+  var objectTypes = DAT_GUI.add(
+    objs,
+    'Objects',
+    [ "Cube", "Teapot", "Sphere", "Cylinder", "File" ]
+  ).listen();
 
   objectTypes.onChange(function(value){ handleObjectType(value) });
 
@@ -192,7 +198,6 @@ function updateRayCaster(){
 
   if(intersects.length > 0){
     var intersect_pt = intersects[0].point;
-    var intersect_norm = intersects[0].face.normal;
     var geoBoundBoxMax = GEOMETRY.boundingBox.max;
 
     var xRayLineGeo1 = RAY_LINES[0].geometry;
@@ -201,7 +206,6 @@ function updateRayCaster(){
     var yRayLineGeo2 = RAY_LINES[3].geometry;
     var zRayLineGeo1 = RAY_LINES[4].geometry;
     var zRayLineGeo2 = RAY_LINES[5].geometry;
-
 
     var xOrigin = _3D_GRID.origin.x;
     var yOrigin = _3D_GRID.origin.y;
@@ -228,14 +232,14 @@ function updateRayCaster(){
     zRayLineGeo2.setPositions([ xAxisMin, yAxisMin, intersect_pt.z,
                                 xAxisMax, yAxisMin, intersect_pt.z ]);
 
-    MOUSE_POINT.position.copy(intersects[0].point);
+    MOUSE_XHAIR.position.copy(intersect_pt);
 
     for(var i = 0; i < RAY_LINES.length; i++){
       RAY_LINES[i].computeLineDistances();
       RAY_LINES[i].visible = true;
     }
 
-    MOUSE_POINT.visible = true;
+    MOUSE_XHAIR.visible = true;
 
     DAT_GUI.__controllers[1].setValue(intersect_pt.x.toString());
     DAT_GUI.__controllers[2].setValue(intersect_pt.y.toString());
@@ -245,7 +249,7 @@ function updateRayCaster(){
     for(var i = 0; i < RAY_LINES.length; i++)
       RAY_LINES[i].visible = false;
 
-    MOUSE_POINT.visible = false;
+    MOUSE_XHAIR.visible = false;
 
     DAT_GUI.__controllers[1].setValue('0.0');
     DAT_GUI.__controllers[2].setValue('0.0');
