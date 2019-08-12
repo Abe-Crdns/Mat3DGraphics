@@ -505,6 +505,11 @@ var CoordSys3D = function(_THREE$Object3D){
       }
     }
   }, {
+    key: "_drawLabels",
+    value: function _drawLabels(args) {
+
+    }
+  }, {
     key: "removeGrid",
     value: function removeGrid(args) {
       var removeXZ = (args !== undefined && args.removeXZ !== undefined) ? args.removeXZ : false;

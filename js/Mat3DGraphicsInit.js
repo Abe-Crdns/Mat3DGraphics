@@ -198,7 +198,12 @@ function updateRayCaster(){
 
   if(intersects.length > 0){
     var intersect_pt = intersects[0].point;
-    var geoBoundBoxMax = GEOMETRY.boundingBox.max;
+    var geoBoundBoxMax;
+    if(GEOMETRY.boundingBox.max != null)
+      geoBoundBoxMax = GEOMETRY.boundingBox.max;
+    else
+      geoBoundBoxMax = MESH.boundingBox.max;
+
 
     var xRayLineGeo1 = RAY_LINES[0].geometry;
     var xRayLineGeo2 = RAY_LINES[1].geometry;
@@ -322,15 +327,13 @@ function readByFileType(){
         GEOMETRY.sourceType = "stl";
         GEOMETRY.sourceFile = filename;
 
-        GEOMETRY.boundingBox = new THREE.Box3();
-        GEOMETRY.boundingBox.setFromObject(GEOMETRY);
+        var material = new THREE.MeshStandardMaterial();
+        MESH = new THREE.Mesh(GEOMETRY, material);
+
+        GEOMETRY.computeBoundingBox();
         adjustCoordSys(GEOMETRY.boundingBox);
 
-        var material = new THREE.MeshStandardMaterial();
-        MESH = new THREE.Mesh(geometry, material);
-
         filename = filename.replace(/[^\w\s]/g, '');
-        GEOMETRY = geometry;
         GEOMETRY.name = filename;
         MESH.name = filename.concat("mesh");
 
