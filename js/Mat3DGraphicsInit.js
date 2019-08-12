@@ -198,12 +198,7 @@ function updateRayCaster(){
 
   if(intersects.length > 0){
     var intersect_pt = intersects[0].point;
-    var geoBoundBoxMax;
-    if(GEOMETRY.boundingBox.max != null)
-      geoBoundBoxMax = GEOMETRY.boundingBox.max;
-    else
-      geoBoundBoxMax = MESH.boundingBox.max;
-
+    var geoBoundBoxMax = GEOMETRY.boundingBox.max;
 
     var xRayLineGeo1 = RAY_LINES[0].geometry;
     var xRayLineGeo2 = RAY_LINES[1].geometry;
